@@ -1,19 +1,3 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.apache.jasper.runtime;
 
 import java.lang.reflect.Method;
@@ -22,8 +6,8 @@ import java.util.HashMap;
 import javax.servlet.jsp.el.FunctionMapper;
 
 /**
- * Maps EL functions to their Java method counterparts. Keeps the actual Method
- * objects protected so that JSP pages can't indirectly do reflection.
+ * 受保护的函数映射器，用于将 EL 函数映射到对应的 Java 方法。
+ * 保持实际的 Method 对象受保护，以防止 JSP 页面间接进行反射操作。
  *
  * @author Mark Roth
  * @author Kin-man Chung
@@ -33,26 +17,25 @@ public final class ProtectedFunctionMapper extends javax.el.FunctionMapper
         implements FunctionMapper {
 
     /**
-     * Maps "prefix:name" to java.lang.Method objects.
+     * 将 "前缀:名称" 映射到 java.lang.Method 对象的哈希表。
      */
     private HashMap<String,Method> fnmap = null;
 
     /**
-     * If there is only one function in the map, this is the Method for it.
+     * 如果映射表中只有一个函数，这是该函数对应的 Method 对象。
      */
     private Method theMethod = null;
 
     /**
-     * Constructor has protected access.
+     * 私有构造方法，防止外部实例化。
      */
     private ProtectedFunctionMapper() {
     }
 
     /**
-     * Generated Servlet and Tag Handler implementations call this method to
-     * retrieve an instance of the ProtectedFunctionMapper.
+     * 生成的 Servlet 和标签处理器实现调用此方法获取 ProtectedFunctionMapper 实例。
      *
-     * @return A new protected function mapper.
+     * @return 一个新的受保护函数映射器实例
      */
     public static ProtectedFunctionMapper getInstance() {
         ProtectedFunctionMapper funcMapper = new ProtectedFunctionMapper();
@@ -61,25 +44,23 @@ public final class ProtectedFunctionMapper extends javax.el.FunctionMapper
     }
 
     /**
-     * Stores a mapping from the given EL function prefix and name to the given
-     * Java method.
+     * 将给定的 EL 函数前缀和名称映射到指定的 Java 方法。
      *
      * @param fnQName
-     *            The EL function qualified name (including prefix)
+     *            EL 函数的限定名（包含前缀）
      * @param c
-     *            The class containing the Java method
+     *            包含该 Java 方法的类
      * @param methodName
-     *            The name of the Java method
+     *            Java 方法的名称
      * @param args
-     *            The arguments of the Java method
+     *            Java 方法的参数类型数组
      * @throws RuntimeException
-     *             if no method with the given signature could be found.
+     *             如果找不到具有给定签名的方法
      */
     public void mapFunction(String fnQName, final Class<?> c,
             final String methodName, final Class<?>[] args) {
-        // Skip if null values were passed in. They indicate a function
-        // added via a lambda or ImportHandler; nether of which need to be
-        // placed in the Map.
+        // 如果传入空值则跳过。它们表示通过 lambda 或 ImportHandler 添加的函数；
+        // 这两种情况都不需要放入映射表中。
         if (fnQName == null) {
             return;
         }
@@ -96,29 +77,27 @@ public final class ProtectedFunctionMapper extends javax.el.FunctionMapper
     }
 
     /**
-     * Creates an instance for this class, and stores the Method for the given
-     * EL function prefix and name. This method is used for the case when there
-     * is only one function in the EL expression.
+     * 创建此类的一个实例，并存储给定 EL 函数前缀和名称对应的 Method 对象。
+     * 此方法用于 EL 表达式中只有一个函数的情况。
      *
      * @param fnQName
-     *            The EL function qualified name (including prefix)
+     *            EL 函数的限定名（包含前缀）
      * @param c
-     *            The class containing the Java method
+     *            包含该 Java 方法的类
      * @param methodName
-     *            The name of the Java method
+     *            Java 方法的名称
      * @param args
-     *            The arguments of the Java method
+     *            Java 方法的参数类型数组
      * @throws RuntimeException
-     *             if no method with the given signature could be found.
-     * @return the mapped function
+     *             如果找不到具有给定签名的方法
+     * @return 包含函数映射的 ProtectedFunctionMapper 实例
      */
     public static ProtectedFunctionMapper getMapForFunction(String fnQName,
             final Class<?> c, final String methodName, final Class<?>[] args) {
         Method method = null;
         ProtectedFunctionMapper funcMapper = new ProtectedFunctionMapper();
-        // Skip if null values were passed in. They indicate a function
-        // added via a lambda or ImportHandler; nether of which need to be
-        // placed in the Map.
+        // 如果传入空值则跳过。它们表示通过 lambda 或 ImportHandler 添加的函数；
+        // 这两种情况都不需要放入映射表中。
         if (fnQName != null) {
             try {
                 method = c.getMethod(methodName, args);
@@ -133,14 +112,14 @@ public final class ProtectedFunctionMapper extends javax.el.FunctionMapper
     }
 
     /**
-     * Resolves the specified local name and prefix into a Java.lang.Method.
-     * Returns null if the prefix and local name are not found.
+     * 将指定的前缀和本地名称解析为 Java.lang.Method 对象。
+     * 如果找不到对应的前缀和本地名称，则返回 null。
      *
      * @param prefix
-     *            the prefix of the function
+     *            函数的前缀
      * @param localName
-     *            the short name of the function
-     * @return the result of the method mapping. Null means no entry found.
+     *            函数的短名称
+     * @return 方法映射的结果。返回 null 表示未找到对应条目
      */
     @Override
     public Method resolveFunction(String prefix, String localName) {

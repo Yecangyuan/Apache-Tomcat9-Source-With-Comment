@@ -1,19 +1,3 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.apache.jasper.runtime;
 
 import java.io.IOException;
@@ -51,8 +35,8 @@ import org.apache.jasper.el.ELContextImpl;
 import org.apache.jasper.runtime.JspContextWrapper.ELContextWrapper;
 
 /**
- * Implementation of the PageContext class from the JSP spec. Also doubles as a
- * VariableResolver for the EL.
+ * PageContext 类的实现类，实现了 JSP 规范中的 PageContext 类。
+ * 同时作为 EL（表达式语言）的 VariableResolver。
  *
  * @author Anil K. Vijendran
  * @author Larry Cable
@@ -64,43 +48,57 @@ import org.apache.jasper.runtime.JspContextWrapper.ELContextWrapper;
  */
 public class PageContextImpl extends PageContext {
 
+    // JSP 工厂实例，用于创建 JSP 相关对象
     private static final JspFactory jspf = JspFactory.getDefaultFactory();
 
+    // BodyContent 对象数组，用于管理嵌套的 body 内容（如标签体）
     private BodyContentImpl[] outs;
 
+    // 当前 body 内容嵌套深度，-1 表示没有嵌套
     private int depth;
 
-    // per-servlet state
+    // ========== 每个 Servlet 的状态 ==========
+    // 当前 JSP 页面对应的 Servlet 实例
     private Servlet servlet;
 
+    // Servlet 配置信息
     private ServletConfig config;
 
+    // Servlet 上下文（应用级别）
     private ServletContext context;
 
+    // JSP 应用上下文，用于 EL 表达式求值等
     private JspApplicationContextImpl applicationContext;
 
+    // 错误页面 URL，用于异常处理时跳转
     private String errorPageURL;
 
-    // page-scope attributes
+    // ========== 页面作用域属性存储 ==========
+    // 页面级别的属性存储（PAGE_SCOPE），使用 HashMap 存储
     private final transient HashMap<String, Object> attributes;
 
-    // per-request state
+    // ========== 每个请求的状态 ==========
+    // 当前请求对象
     private transient ServletRequest request;
 
+    // 当前响应对象
     private transient ServletResponse response;
 
+    // 当前会话对象
     private transient HttpSession session;
 
+    // EL 上下文，用于表达式语言求值
     private transient ELContextImpl elContext;
 
-
-    // initial output stream
+    // ========== 输出流相关 ==========
+    // 当前 JSP 输出流
     private transient JspWriter out;
 
+    // 基础输出流，页面顶层输出
     private transient JspWriterImpl baseOut;
 
-    /*
-     * Constructor.
+    /**
+     * 构造方法。
      */
     PageContextImpl() {
         this.outs = new BodyContentImpl[0];
@@ -108,6 +106,20 @@ public class PageContextImpl extends PageContext {
         this.depth = -1;
     }
 
+    /**
+     * 初始化 PageContext。
+     * 设置 Servlet、请求、响应、会话等状态，并初始化输出流。
+     * 同时按照 JSP 规范注册内置对象（out、request、response、session 等）到页面作用域。
+     *
+     * @param servlet      当前 JSP 对应的 Servlet
+     * @param request      当前请求
+     * @param response     当前响应
+     * @param errorPageURL 错误页面 URL
+     * @param needsSession 是否需要会话
+     * @param bufferSize   缓冲区大小
+     * @param autoFlush    是否自动刷新
+     * @throws IOException 当输出流初始化失败时抛出
+     */
     @Override
     public void initialize(Servlet servlet, ServletRequest request,
             ServletResponse response, String errorPageURL,
@@ -160,6 +172,10 @@ public class PageContextImpl extends PageContext {
         setAttribute(APPLICATION, context);
     }
 
+    /**
+     * 释放 PageContext 占用的资源。
+     * 刷新缓冲区，清空所有引用，回收输出流对象。
+     */
     @Override
     public void release() {
         out = baseOut;
@@ -187,11 +203,28 @@ public class PageContextImpl extends PageContext {
         }
     }
 
+    /**
+     * 获取指定名称的属性值，默认在页面作用域中查找。
+     *
+     * @param name 属性名称
+     * @return 属性值，如果不存在则返回 null
+     */
     @Override
     public Object getAttribute(final String name) {
         return getAttribute(name, PAGE_SCOPE);
     }
 
+    /**
+     * 在指定作用域中获取属性值。
+     * 支持的作用域：PAGE_SCOPE、REQUEST_SCOPE、SESSION_SCOPE、APPLICATION_SCOPE。
+     *
+     * @param name  属性名称
+     * @param scope 作用域
+     * @return 属性值，如果不存在则返回 null
+     * @throws NullPointerException     如果 name 为 null
+     * @throws IllegalStateException    如果在 SESSION_SCOPE 中但 session 为 null
+     * @throws IllegalArgumentException 如果 scope 无效
+     */
     @Override
     public Object getAttribute(final String name, final int scope) {
 
@@ -220,11 +253,29 @@ public class PageContextImpl extends PageContext {
         }
     }
 
+    /**
+     * 在页面作用域中设置属性值。
+     *
+     * @param name      属性名称
+     * @param attribute 属性值
+     */
     @Override
     public void setAttribute(final String name, final Object attribute) {
         setAttribute(name, attribute, PAGE_SCOPE);
     }
 
+    /**
+     * 在指定作用域中设置属性值。
+     * 如果值为 null，则等效于调用 removeAttribute。
+     * 支持的作用域：PAGE_SCOPE、REQUEST_SCOPE、SESSION_SCOPE、APPLICATION_SCOPE。
+     *
+     * @param name  属性名称
+     * @param o     属性值
+     * @param scope 作用域
+     * @throws NullPointerException     如果 name 为 null
+     * @throws IllegalStateException    如果在 SESSION_SCOPE 中但 session 为 null
+     * @throws IllegalArgumentException 如果 scope 无效
+     */
     @Override
     public void setAttribute(final String name, final Object o, final int scope) {
 
@@ -262,6 +313,16 @@ public class PageContextImpl extends PageContext {
         }
     }
 
+    /**
+     * 从指定作用域中移除属性。
+     * 支持的作用域：PAGE_SCOPE、REQUEST_SCOPE、SESSION_SCOPE、APPLICATION_SCOPE。
+     *
+     * @param name  属性名称
+     * @param scope 作用域
+     * @throws NullPointerException     如果 name 为 null
+     * @throws IllegalStateException    如果在 SESSION_SCOPE 中但 session 为 null
+     * @throws IllegalArgumentException 如果 scope 无效
+     */
     @Override
     public void removeAttribute(final String name, final int scope) {
 
@@ -327,6 +388,14 @@ public class PageContextImpl extends PageContext {
         return 0;
     }
 
+    /**
+     * 按优先级顺序在所有作用域中查找属性。
+     * 搜索顺序：页面作用域 -> 请求作用域 -> 会话作用域 -> 应用作用域。
+     *
+     * @param name 属性名称
+     * @return 第一个找到的属性值，如果都不存在则返回 null
+     * @throws NullPointerException 如果 name 为 null
+     */
     @Override
     public Object findAttribute(final String name) {
         if (name == null) {
@@ -401,11 +470,21 @@ public class PageContextImpl extends PageContext {
         removeAttribute(name, APPLICATION_SCOPE);
     }
 
+    /**
+     * 获取当前的 JspWriter 输出流。
+     *
+     * @return 当前的 JspWriter 对象
+     */
     @Override
     public JspWriter getOut() {
         return out;
     }
 
+    /**
+     * 获取当前会话对象。
+     *
+     * @return HttpSession 对象，如果页面不需要会话则可能返回 null
+     */
     @Override
     public HttpSession getSession() {
         return session;
@@ -421,11 +500,21 @@ public class PageContextImpl extends PageContext {
         return config.getServletContext();
     }
 
+    /**
+     * 获取当前请求对象。
+     *
+     * @return ServletRequest 对象
+     */
     @Override
     public ServletRequest getRequest() {
         return request;
     }
 
+    /**
+     * 获取当前响应对象。
+     *
+     * @return ServletResponse 对象
+     */
     @Override
     public ServletResponse getResponse() {
         return response;
@@ -472,6 +561,14 @@ public class PageContextImpl extends PageContext {
         return path;
     }
 
+    /**
+     * 包含指定的资源到当前页面。
+     * 被包含的资源会共享当前页面的请求和响应对象。
+     *
+     * @param relativeUrlPath 要包含的资源的相对路径
+     * @throws ServletException 如果包含过程中发生 Servlet 异常
+     * @throws IOException      如果包含过程中发生 I/O 异常
+     */
     @Override
     public void include(String relativeUrlPath) throws ServletException,
             IOException {
@@ -479,6 +576,14 @@ public class PageContextImpl extends PageContext {
                 .include(request, response, relativeUrlPath, out, true);
     }
 
+    /**
+     * 包含指定的资源到当前页面，并可指定是否在包含前刷新缓冲区。
+     *
+     * @param relativeUrlPath 要包含的资源的相对路径
+     * @param flush           是否在包含前刷新缓冲区
+     * @throws ServletException 如果包含过程中发生 Servlet 异常
+     * @throws IOException      如果包含过程中发生 I/O 异常
+     */
     @Override
     public void include(final String relativeUrlPath, final boolean flush)
             throws ServletException, IOException {
@@ -492,6 +597,15 @@ public class PageContextImpl extends PageContext {
                 this.getELContext());
     }
 
+    /**
+     * 将请求转发到指定的资源。
+     * 转发后，当前页面的输出将被清空，控制权转交给目标资源。
+     * 如果缓冲区已被刷新，则抛出 IllegalStateException。
+     *
+     * @param relativeUrlPath 要转发到的资源的相对路径
+     * @throws ServletException 如果转发过程中发生 Servlet 异常
+     * @throws IOException      如果转发过程中发生 I/O 异常
+     */
     @Override
     public void forward(final String relativeUrlPath) throws ServletException, IOException {
         // JSP.4.5 If the buffer was flushed, throw IllegalStateException

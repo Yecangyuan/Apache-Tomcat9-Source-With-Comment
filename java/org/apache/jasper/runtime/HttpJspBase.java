@@ -1,19 +1,3 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.apache.jasper.runtime;
 
 import java.io.IOException;
@@ -29,7 +13,7 @@ import org.apache.jasper.Constants;
 import org.apache.jasper.compiler.Localizer;
 
 /**
- * This is the super class of all JSP-generated servlets.
+ * HTTP JSP 页面的基类，所有 JSP 编译后的 Servlet 都继承此类。
  *
  * @author Anil K. Vijendran
  */
@@ -40,6 +24,9 @@ public abstract class HttpJspBase extends HttpServlet implements HttpJspPage {
     protected HttpJspBase() {
     }
 
+    /**
+     * 初始化
+     */
     @Override
     public final void init(ServletConfig config)
         throws ServletException
@@ -49,6 +36,9 @@ public abstract class HttpJspBase extends HttpServlet implements HttpJspPage {
         _jspInit();
     }
 
+    /**
+     * 获取 Servlet 信息
+     */
     @Override
     public String getServletInfo() {
         return Localizer.getMessage("jsp.engine.info", Constants.SPEC_VERSION);
@@ -60,6 +50,9 @@ public abstract class HttpJspBase extends HttpServlet implements HttpJspPage {
         _jspDestroy();
     }
 
+    /**
+     * 服务方法
+     */
     @Override
     public final void service(HttpServletRequest request, HttpServletResponse response)
         throws ServletException, IOException
@@ -71,6 +64,9 @@ public abstract class HttpJspBase extends HttpServlet implements HttpJspPage {
     public void jspInit() {
     }
 
+    /**
+     * JSP 初始化方法，由子类实现
+     */
     public void _jspInit() {
     }
 
@@ -81,6 +77,9 @@ public abstract class HttpJspBase extends HttpServlet implements HttpJspPage {
     protected void _jspDestroy() {
     }
 
+    /**
+     * JSP 服务方法，由子类实现
+     */
     @Override
     public abstract void _jspService(HttpServletRequest request,
                                      HttpServletResponse response)

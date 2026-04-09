@@ -1,19 +1,3 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.apache.jasper.runtime;
 
 import java.io.IOException;
@@ -56,46 +40,66 @@ import javax.servlet.jsp.tagext.VariableInfo;
 import org.apache.jasper.compiler.Localizer;
 
 /**
- * Implementation of a JSP Context Wrapper.
+ * JspContext 包装器的实现。
  *
- * The JSP Context Wrapper is a JspContext created and maintained by a tag
- * handler implementation. It wraps the Invoking JSP Context, that is, the
- * JspContext instance passed to the tag handler by the invoking page via
- * setJspContext().
+ * JspContext 包装器是一个由标签处理器实现创建和维护的 JspContext。
+ * 它包装了调用者的 JSP 上下文，即调用页面通过 setJspContext() 方法
+ * 传递给标签处理器的 JspContext 实例。
+ *
+ * 此类主要用于支持 JSP 标签文件（tag file）和包含动作（include action），
+ * 在标签执行期间提供一个隔离的页面作用域环境，同时能够访问调用页面的
+ * 请求、会话和应用作用域。
  *
  * @author Kin-man Chung
  * @author Jan Luehe
  * @author Jacob Hookom
  */
-@SuppressWarnings("deprecation") // Have to support old JSP EL API
+@SuppressWarnings("deprecation") // 必须支持旧的 JSP EL API
 public class JspContextWrapper extends PageContext implements VariableResolver {
 
+    /** 当前标签处理器实例 */
     private final JspTag jspTag;
 
-    // Invoking JSP context
+    /** 调用者 JSP 上下文（即调用页面的 PageContext） */
     private final PageContext invokingJspCtxt;
 
+    /** 页面作用域属性存储（本包装器的虚拟页面作用域） */
     private final transient HashMap<String, Object> pageAttributes;
 
-    // ArrayList of NESTED scripting variables
+    /** NESTED 作用域的脚本变量列表（标签体内有效） */
     private final ArrayList<String> nestedVars;
 
-    // ArrayList of AT_BEGIN scripting variables
+    /** AT_BEGIN 作用域的脚本变量列表（从标签开始处有效） */
     private final ArrayList<String> atBeginVars;
 
-    // ArrayList of AT_END scripting variables
+    /** AT_END 作用域的脚本变量列表（标签结束时有效） */
     private final ArrayList<String> atEndVars;
 
+    /** 变量别名映射（将变量名映射到别名） */
     private final Map<String,String> aliases;
 
+    /** 保存原始 NESTED 变量值的映射，用于在标签结束后恢复 */
     private final HashMap<String, Object> originalNestedVars;
 
+    /** ServletContext 缓存 */
     private ServletContext servletContext = null;
 
+    /** ELContext 缓存 */
     private ELContext elContext = null;
 
+    /** 根 JSP 上下文（最顶层的 PageContext） */
     private final PageContext rootJspCtxt;
 
+    /**
+     * 构造一个新的 JspContextWrapper。
+     *
+     * @param jspTag 标签处理器实例
+     * @param jspContext 调用者的 JspContext
+     * @param nestedVars NESTED 作用域变量列表
+     * @param atBeginVars AT_BEGIN 作用域变量列表
+     * @param atEndVars AT_END 作用域变量列表
+     * @param aliases 变量别名映射
+     */
     public JspContextWrapper(JspTag jspTag, JspContext jspContext,
             ArrayList<String> nestedVars, ArrayList<String> atBeginVars,
             ArrayList<String> atEndVars, Map<String,String> aliases) {
@@ -127,6 +131,13 @@ public class JspContextWrapper extends PageContext implements VariableResolver {
             throws IOException, IllegalStateException, IllegalArgumentException {
     }
 
+    /**
+     * 获取指定名称的属性值（从页面作用域中查找）。
+     *
+     * @param name 属性名称
+     * @return 属性值，如果不存在则返回 null
+     * @throws NullPointerException 如果 name 为 null
+     */
     @Override
     public Object getAttribute(String name) {
 
@@ -138,6 +149,14 @@ public class JspContextWrapper extends PageContext implements VariableResolver {
         return pageAttributes.get(name);
     }
 
+    /**
+     * 获取指定名称和作用域的属性值。
+     *
+     * @param name 属性名称
+     * @param scope 作用域（PAGE_SCOPE, REQUEST_SCOPE, SESSION_SCOPE, APPLICATION_SCOPE）
+     * @return 属性值，如果不存在则返回 null
+     * @throws NullPointerException 如果 name 为 null
+     */
     @Override
     public Object getAttribute(String name, int scope) {
 
@@ -153,6 +172,14 @@ public class JspContextWrapper extends PageContext implements VariableResolver {
         return rootJspCtxt.getAttribute(name, scope);
     }
 
+    /**
+     * 设置页面作用域的属性值。
+     * 如果 value 为 null，则删除该属性。
+     *
+     * @param name 属性名称
+     * @param value 属性值
+     * @throws NullPointerException 如果 name 为 null
+     */
     @Override
     public void setAttribute(String name, Object value) {
 
@@ -168,6 +195,15 @@ public class JspContextWrapper extends PageContext implements VariableResolver {
         }
     }
 
+    /**
+     * 设置指定作用域的属性值。
+     * 如果 value 为 null，则删除该属性。
+     *
+     * @param name 属性名称
+     * @param value 属性值
+     * @param scope 作用域（PAGE_SCOPE, REQUEST_SCOPE, SESSION_SCOPE, APPLICATION_SCOPE）
+     * @throws NullPointerException 如果 name 为 null
+     */
     @Override
     public void setAttribute(String name, Object value, int scope) {
 
@@ -187,6 +223,13 @@ public class JspContextWrapper extends PageContext implements VariableResolver {
         }
     }
 
+    /**
+     * 按顺序在所有作用域中查找属性：页面、请求、会话、应用。
+     *
+     * @param name 属性名称
+     * @return 第一个找到的属性值，如果都不存在则返回 null
+     * @throws NullPointerException 如果 name 为 null
+     */
     @Override
     public Object findAttribute(String name) {
 
@@ -203,8 +246,7 @@ public class JspContextWrapper extends PageContext implements VariableResolver {
                     try {
                         o = rootJspCtxt.getAttribute(name, SESSION_SCOPE);
                     } catch (IllegalStateException ise) {
-                        // Session has been invalidated.
-                        // Ignore and fall through to application scope.
+                        // 会话已失效，忽略并继续查找应用作用域
                     }
                 }
                 if (o == null) {
@@ -216,6 +258,12 @@ public class JspContextWrapper extends PageContext implements VariableResolver {
         return o;
     }
 
+    /**
+     * 从所有作用域中删除指定名称的属性。
+     *
+     * @param name 属性名称
+     * @throws NullPointerException 如果 name 为 null
+     */
     @Override
     public void removeAttribute(String name) {
 
@@ -232,6 +280,13 @@ public class JspContextWrapper extends PageContext implements VariableResolver {
         rootJspCtxt.removeAttribute(name, APPLICATION_SCOPE);
     }
 
+    /**
+     * 从指定作用域中删除指定名称的属性。
+     *
+     * @param name 属性名称
+     * @param scope 作用域
+     * @throws NullPointerException 如果 name 为 null
+     */
     @Override
     public void removeAttribute(String name, int scope) {
 
@@ -247,6 +302,13 @@ public class JspContextWrapper extends PageContext implements VariableResolver {
         }
     }
 
+    /**
+     * 获取属性所在的作用域。
+     *
+     * @param name 属性名称
+     * @return 作用域常量，如果属性不存在则返回 0
+     * @throws NullPointerException 如果 name 为 null
+     */
     @Override
     public int getAttributesScope(String name) {
 
@@ -262,6 +324,12 @@ public class JspContextWrapper extends PageContext implements VariableResolver {
         }
     }
 
+    /**
+     * 获取指定作用域中所有属性的枚举。
+     *
+     * @param scope 作用域
+     * @return 属性名称的枚举
+     */
     @Override
     public Enumeration<String> getAttributeNamesInScope(int scope) {
         if (scope == PAGE_SCOPE) {
@@ -276,26 +344,51 @@ public class JspContextWrapper extends PageContext implements VariableResolver {
         invokingJspCtxt.release();
     }
 
+    /**
+     * 获取当前的 JspWriter 输出流。
+     *
+     * @return JspWriter 实例
+     */
     @Override
     public JspWriter getOut() {
         return rootJspCtxt.getOut();
     }
 
+    /**
+     * 获取当前请求的 HttpSession。
+     *
+     * @return HttpSession 实例，如果没有会话则返回 null
+     */
     @Override
     public HttpSession getSession() {
         return rootJspCtxt.getSession();
     }
 
+    /**
+     * 获取当前页面的 Servlet 实例。
+     *
+     * @return Servlet 实例
+     */
     @Override
     public Object getPage() {
         return invokingJspCtxt.getPage();
     }
 
+    /**
+     * 获取当前请求的 ServletRequest。
+     *
+     * @return ServletRequest 实例
+     */
     @Override
     public ServletRequest getRequest() {
         return invokingJspCtxt.getRequest();
     }
 
+    /**
+     * 获取当前响应的 ServletResponse。
+     *
+     * @return ServletResponse 实例
+     */
     @Override
     public ServletResponse getResponse() {
         return rootJspCtxt.getResponse();
@@ -306,11 +399,21 @@ public class JspContextWrapper extends PageContext implements VariableResolver {
         return invokingJspCtxt.getException();
     }
 
+    /**
+     * 获取 Servlet 的配置信息。
+     *
+     * @return ServletConfig 实例
+     */
     @Override
     public ServletConfig getServletConfig() {
         return invokingJspCtxt.getServletConfig();
     }
 
+    /**
+     * 获取 ServletContext 上下文。
+     *
+     * @return ServletContext 实例
+     */
     @Override
     public ServletContext getServletContext() {
         if (servletContext == null) {
@@ -319,18 +422,40 @@ public class JspContextWrapper extends PageContext implements VariableResolver {
         return servletContext;
     }
 
+    /**
+     * 将请求转发到指定的相对路径。
+     *
+     * @param relativeUrlPath 相对 URL 路径
+     * @throws ServletException 如果转发失败
+     * @throws IOException 如果 I/O 错误
+     */
     @Override
     public void forward(String relativeUrlPath) throws ServletException,
             IOException {
         invokingJspCtxt.forward(relativeUrlPath);
     }
 
+    /**
+     * 包含指定路径的资源输出。
+     *
+     * @param relativeUrlPath 相对 URL 路径
+     * @throws ServletException 如果包含失败
+     * @throws IOException 如果 I/O 错误
+     */
     @Override
     public void include(String relativeUrlPath) throws ServletException,
             IOException {
         invokingJspCtxt.include(relativeUrlPath);
     }
 
+    /**
+     * 包含指定路径的资源输出，并可选择是否在包含前刷新输出缓冲区。
+     *
+     * @param relativeUrlPath 相对 URL 路径
+     * @param flush 是否在包含前刷新缓冲区（此处被忽略，始终为 false）
+     * @throws ServletException 如果包含失败
+     * @throws IOException 如果 I/O 错误
+     */
     @Override
     public void include(String relativeUrlPath, boolean flush)
             throws ServletException, IOException {
@@ -343,16 +468,32 @@ public class JspContextWrapper extends PageContext implements VariableResolver {
         return this;
     }
 
+    /**
+     * 推送一个新的 BodyContent 缓冲区。
+     *
+     * @return 新的 BodyContent 实例
+     */
     @Override
     public BodyContent pushBody() {
         return invokingJspCtxt.pushBody();
     }
 
+    /**
+     * 推送一个使用指定 Writer 的 JspWriter。
+     *
+     * @param writer 指定的 Writer
+     * @return 新的 JspWriter 实例
+     */
     @Override
     public JspWriter pushBody(Writer writer) {
         return invokingJspCtxt.pushBody(writer);
     }
 
+    /**
+     * 弹出当前的 BodyContent 缓冲区，恢复到上一个输出流。
+     *
+     * @return 恢复后的 JspWriter 实例
+     */
     @Override
     public JspWriter popBody() {
         return invokingJspCtxt.popBody();
@@ -367,8 +508,7 @@ public class JspContextWrapper extends PageContext implements VariableResolver {
     @Override
     public void handlePageException(Exception ex) throws IOException,
             ServletException {
-        // Should never be called since handleException() called with a
-        // Throwable in the generated servlet.
+        // 此方法不应被调用，因为生成的 servlet 中使用的是带有 Throwable 参数的 handleException()
         handlePageException((Throwable) ex);
     }
 
@@ -379,7 +519,7 @@ public class JspContextWrapper extends PageContext implements VariableResolver {
     }
 
     /**
-     * VariableResolver interface
+     * VariableResolver 接口实现
      */
     @Override
     @Deprecated
@@ -389,14 +529,14 @@ public class JspContextWrapper extends PageContext implements VariableResolver {
     }
 
     /**
-     * Synchronize variables at begin of tag file
+     * 在标签文件开始时同步变量
      */
     public void syncBeginTagFile() {
         saveNestedVariables();
     }
 
     /**
-     * Synchronize variables before fragment invocation
+     * 在片段调用前同步变量
      */
     public void syncBeforeInvoke() {
         copyTagToPageScope(VariableInfo.NESTED);
@@ -404,7 +544,7 @@ public class JspContextWrapper extends PageContext implements VariableResolver {
     }
 
     /**
-     * Synchronize variables at end of tag file
+     * 在标签文件结束时同步变量
      */
     public void syncEndTagFile() {
         copyTagToPageScope(VariableInfo.AT_BEGIN);
@@ -413,11 +553,9 @@ public class JspContextWrapper extends PageContext implements VariableResolver {
     }
 
     /**
-     * Copies the variables of the given scope from the virtual page scope of
-     * this JSP context wrapper to the page scope of the invoking JSP context.
+     * 将指定作用域的变量从本 JSP 上下文的虚拟页面作用域复制到调用者 JSP 上下文的页面作用域。
      *
-     * @param scope
-     *            variable scope (one of NESTED, AT_BEGIN, or AT_END)
+     * @param scope 变量作用域（NESTED、AT_BEGIN 或 AT_END 之一）
      */
     private void copyTagToPageScope(int scope) {
         Iterator<String> iter = null;
@@ -453,8 +591,7 @@ public class JspContextWrapper extends PageContext implements VariableResolver {
     }
 
     /**
-     * Saves the values of any NESTED variables that are present in the invoking
-     * JSP context, so they can later be restored.
+     * 保存调用者 JSP 上下文中存在的所有 NESTED 变量的值，以便后续恢复。
      */
     private void saveNestedVariables() {
         if (nestedVars != null) {
@@ -469,7 +606,7 @@ public class JspContextWrapper extends PageContext implements VariableResolver {
     }
 
     /**
-     * Restores the values of any NESTED variables in the invoking JSP context.
+     * 恢复调用者 JSP 上下文中所有 NESTED 变量的值。
      */
     private void restoreNestedVariables() {
         if (nestedVars != null) {
@@ -486,13 +623,10 @@ public class JspContextWrapper extends PageContext implements VariableResolver {
     }
 
     /**
-     * Checks to see if the given variable name is used as an alias, and if so,
-     * returns the variable name for which it is used as an alias.
+     * 检查给定的变量名是否被用作别名，如果是，则返回它所代表的变量名。
      *
-     * @param varName
-     *            The variable name to check
-     * @return The variable name for which varName is used as an alias, or
-     *         varName if it is not being used as an alias
+     * @param varName 要检查的变量名
+     * @return 如果 varName 被用作别名，则返回对应的变量名；否则返回 varName 本身
      */
     private String findAlias(String varName) {
 
@@ -507,6 +641,12 @@ public class JspContextWrapper extends PageContext implements VariableResolver {
         return alias;
     }
 
+    /**
+     * 获取与此 JspContext 关联的 ELContext。
+     * 如果尚未创建，则创建一个新的 ELContextWrapper。
+     *
+     * @return ELContext 实例
+     */
     @Override
     public ELContext getELContext() {
         if (elContext == null) {
@@ -521,11 +661,21 @@ public class JspContextWrapper extends PageContext implements VariableResolver {
     }
 
 
+    /**
+     * ELContext 包装器类，用于在标签文件中提供隔离的 EL 上下文环境。
+     */
     static class ELContextWrapper extends ELContext {
 
+        /** 被包装的 ELContext */
         private final ELContext wrapped;
+        
+        /** 当前标签处理器 */
         private final JspTag jspTag;
+        
+        /** 关联的 PageContext */
         private final PageContext pageContext;
+        
+        /** 导入处理器 */
         private ImportHandler importHandler;
 
         private ELContextWrapper(ELContext wrapped, JspTag jspTag, PageContext pageContext) {

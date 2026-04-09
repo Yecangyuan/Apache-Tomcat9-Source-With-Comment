@@ -1,19 +1,3 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.apache.jasper.runtime;
 
 import javax.servlet.jsp.JspContext;
@@ -22,13 +6,11 @@ import javax.servlet.jsp.tagext.JspFragment;
 import javax.servlet.jsp.tagext.JspTag;
 
 /**
- * Helper class from which all Jsp Fragment helper classes extend.
- * This class allows for the emulation of numerous fragments within
- * a single class, which in turn reduces the load on the class loader
- * since there are potentially many JspFragments in a single page.
+ * JspFragment 的帮助类，所有 Jsp Fragment 帮助类都继承自此类。
+ * 该类允许在一个类中模拟多个片段，从而减轻类加载器的负担，
+ * 因为单个页面中可能存在大量的 JspFragment。
  * <p>
- * The class also provides various utility methods for JspFragment
- * implementations.
+ * 该类还为 JspFragment 的实现提供了各种实用方法。
  *
  * @author Mark Roth
  */
@@ -39,6 +21,13 @@ public abstract class JspFragmentHelper extends JspFragment {
     protected final PageContext _jspx_page_context;
     protected final JspTag parentTag;
 
+    /**
+     * 构造方法，初始化 JspFragmentHelper 实例。
+     *
+     * @param discriminator 区分标识符，用于区分同一类中的不同片段
+     * @param jspContext JSP 上下文对象，提供对 JSP 环境的访问
+     * @param parentTag 父标签对象，表示包含此片段的父 JspTag
+     */
     public JspFragmentHelper( int discriminator, JspContext jspContext,
         JspTag parentTag )
     {
@@ -52,11 +41,21 @@ public abstract class JspFragmentHelper extends JspFragment {
         this.parentTag = parentTag;
     }
 
+    /**
+     * 获取与此片段关联的 JspContext 对象。
+     *
+     * @return JSP 上下文对象
+     */
     @Override
     public JspContext getJspContext() {
         return this.jspContext;
     }
 
+    /**
+     * 获取包含此片段的父 JspTag 对象。
+     *
+     * @return 父标签对象
+     */
     public JspTag getParentTag() {
         return this.parentTag;
     }

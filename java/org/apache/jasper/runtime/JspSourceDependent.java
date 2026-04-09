@@ -1,38 +1,20 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.apache.jasper.runtime;
 
 import java.util.Map;
 
 /**
- * Interface for tracking the source files dependencies, for the purpose
- * of compiling out of date pages.  This is used for
- * 1) files that are included by page directives
- * 2) files that are included by include-prelude and include-coda in jsp:config
- * 3) files that are tag files and referenced
- * 4) TLDs referenced
+ * 用于跟踪源文件依赖的接口，目的是编译过期页面。这适用于：
+ * 1) 被页面指令（page directives）包含的文件
+ * 2) 被 jsp:config 中的 include-prelude 和 include-coda 包含的文件
+ * 3) 被引用的标签文件（tag files）
+ * 4) 被引用的 TLD 文件
  */
 
 public interface JspSourceDependent {
 
    /**
-    * Returns a map of file names and last modified time where the current page
-    * has a source dependency on the file.
-    * @return the map of dependent resources
+    * 返回当前页面所依赖的源文件的文件名和最后修改时间的映射。
+    * @return 依赖资源的映射表，键为文件名，值为最后修改时间戳
     */
     Map<String,Long> getDependants();
 

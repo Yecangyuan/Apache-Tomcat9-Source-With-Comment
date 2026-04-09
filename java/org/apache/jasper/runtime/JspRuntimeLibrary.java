@@ -1,19 +1,3 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.apache.jasper.runtime;
 
 import java.beans.PropertyEditor;
@@ -43,13 +27,12 @@ import org.apache.juli.logging.LogFactory;
 import org.apache.tomcat.InstanceManager;
 
 /**
- * Bunch of util methods that are used by code generated for useBean,
- * getProperty and setProperty.
+ * JSP 运行时库类，提供了各种实用方法。
+ * 主要用于为 useBean、getProperty 和 setProperty 操作生成的代码提供支持。
  *
- * The __begin, __end stuff is there so that the JSP engine can
- * actually parse this file and inline them if people don't want
- * runtime dependencies on this class. However, I'm not sure if that
- * works so well right now. It got forgotten at some point. -akv
+ * 类中的 __begin 和 __end 标记用于让 JSP 引擎能够解析此文件，
+ * 并在不希望运行时依赖此类的情况下内联这些方法。
+ * 不过，目前不确定这个功能是否还能正常工作，它在某个时候被遗忘了。-akv
  *
  * @author Mandar Raje
  * @author Shawn Bayern
@@ -73,15 +56,15 @@ public class JspRuntimeLibrary {
     }
 
     /**
-     * Returns the value of the javax.servlet.error.exception request
-     * attribute value, if present, otherwise the value of the
-     * javax.servlet.jsp.jspException request attribute value.
+     * 获取请求中的异常对象。
+     * 首先尝试获取 javax.servlet.error.exception 属性，
+     * 如果不存在则获取 javax.servlet.jsp.jspException 属性值。
      *
-     * This method is called at the beginning of the generated servlet code
-     * for a JSP error page, when the "exception" implicit scripting language
-     * variable is initialized.
-     * @param request The Servlet request
-     * @return the throwable in the error attribute if any
+     * 此方法在 JSP 错误页面生成的 Servlet 代码开始时被调用，
+     * 用于初始化 "exception" 隐式脚本语言变量。
+     *
+     * @param request Servlet 请求对象
+     * @return 错误属性中的 Throwable 对象，如果没有则返回 null
      */
     public static Throwable getThrowable(ServletRequest request) {
         Throwable error = (Throwable) request.getAttribute(
@@ -90,11 +73,9 @@ public class JspRuntimeLibrary {
             error = (Throwable) request.getAttribute(PageContext.EXCEPTION);
             if (error != null) {
                 /*
-                 * The only place that sets JSP_EXCEPTION is
-                 * PageContextImpl.handlePageException(). It really should set
-                 * SERVLET_EXCEPTION, but that would interfere with the
-                 * ErrorReportValve. Therefore, if JSP_EXCEPTION is set, we
-                 * need to set SERVLET_EXCEPTION.
+                 * 唯一设置 JSP_EXCEPTION 的地方是 PageContextImpl.handlePageException()。
+                 * 它实际上应该设置 SERVLET_EXCEPTION，但那样会干扰 ErrorReportValve。
+                 * 因此，如果设置了 JSP_EXCEPTION，我们需要设置 SERVLET_EXCEPTION。
                  */
                 request.setAttribute(RequestDispatcher.ERROR_EXCEPTION, error);
             }
@@ -103,6 +84,13 @@ public class JspRuntimeLibrary {
         return error;
     }
 
+    /**
+     * 将字符串强制转换为布尔值。
+     * 如果字符串为 null 或空，则返回 false。
+     *
+     * @param s 要转换的字符串
+     * @return 布尔值
+     */
     public static boolean coerceToBoolean(String s) {
         if (s == null || s.length() == 0) {
             return false;
@@ -111,6 +99,13 @@ public class JspRuntimeLibrary {
         }
     }
 
+    /**
+     * 将字符串强制转换为字节。
+     * 如果字符串为 null 或空，则返回 0。
+     *
+     * @param s 要转换的字符串
+     * @return 字节值
+     */
     public static byte coerceToByte(String s) {
         if (s == null || s.length() == 0) {
             return (byte) 0;
@@ -119,6 +114,13 @@ public class JspRuntimeLibrary {
         }
     }
 
+    /**
+     * 将字符串强制转换为字符。
+     * 如果字符串为 null 或空，则返回字符 0。
+     *
+     * @param s 要转换的字符串
+     * @return 字符值
+     */
     public static char coerceToChar(String s) {
         if (s == null || s.length() == 0) {
             return (char) 0;
@@ -127,6 +129,13 @@ public class JspRuntimeLibrary {
         }
     }
 
+    /**
+     * 将字符串强制转换为双精度浮点数。
+     * 如果字符串为 null 或空，则返回 0。
+     *
+     * @param s 要转换的字符串
+     * @return 双精度浮点数值
+     */
     public static double coerceToDouble(String s) {
         if (s == null || s.length() == 0) {
             return 0;
@@ -135,6 +144,13 @@ public class JspRuntimeLibrary {
         }
     }
 
+    /**
+     * 将字符串强制转换为单精度浮点数。
+     * 如果字符串为 null 或空，则返回 0。
+     *
+     * @param s 要转换的字符串
+     * @return 单精度浮点数值
+     */
     public static float coerceToFloat(String s) {
         if (s == null || s.length() == 0) {
             return 0;
@@ -143,6 +159,13 @@ public class JspRuntimeLibrary {
         }
     }
 
+    /**
+     * 将字符串强制转换为整数。
+     * 如果字符串为 null 或空，则返回 0。
+     *
+     * @param s 要转换的字符串
+     * @return 整数值
+     */
     public static int coerceToInt(String s) {
         if (s == null || s.length() == 0) {
             return 0;
@@ -151,6 +174,13 @@ public class JspRuntimeLibrary {
         }
     }
 
+    /**
+     * 将字符串强制转换为短整数。
+     * 如果字符串为 null 或空，则返回 0。
+     *
+     * @param s 要转换的字符串
+     * @return 短整数值
+     */
     public static short coerceToShort(String s) {
         if (s == null || s.length() == 0) {
             return (short) 0;
@@ -159,6 +189,13 @@ public class JspRuntimeLibrary {
         }
     }
 
+    /**
+     * 将字符串强制转换为长整数。
+     * 如果字符串为 null 或空，则返回 0。
+     *
+     * @param s 要转换的字符串
+     * @return 长整数值
+     */
     public static long coerceToLong(String s) {
         if (s == null || s.length() == 0) {
             return 0;
@@ -167,6 +204,14 @@ public class JspRuntimeLibrary {
         }
     }
 
+    /**
+     * 将字符串强制转换为指定类型的包装类对象。
+     * 支持 Boolean、Byte、Character、Double、Float、Integer、Short、Long 类型。
+     *
+     * @param s 要转换的字符串
+     * @param target 目标类型
+     * @return 转换后的对象
+     */
     public static Object coerce(String s, Class<?> target) {
 
         boolean isNullOrEmpty = (s == null || s.length() == 0);
@@ -226,6 +271,17 @@ public class JspRuntimeLibrary {
     }
 
    // __begin convertMethod
+    /**
+     * 将字符串转换为指定类型的对象。
+     * 支持基本类型及其包装类，以及使用 PropertyEditor 进行自定义转换。
+     *
+     * @param propertyName 属性名称
+     * @param s 要转换的字符串
+     * @param t 目标类型
+     * @param propertyEditorClass 属性编辑器类
+     * @return 转换后的对象
+     * @throws JasperException 转换失败时抛出
+     */
     public static Object convert(String propertyName, String s, Class<?> t,
             Class<?> propertyEditorClass)
        throws JasperException
@@ -300,6 +356,13 @@ public class JspRuntimeLibrary {
     // __end convertMethod
 
     // __begin introspectMethod
+    /**
+     * 对 JavaBean 进行自省，根据请求参数设置属性值。
+     *
+     * @param bean 要进行自省的 JavaBean
+     * @param request Servlet 请求对象
+     * @throws JasperException 处理失败时抛出
+     */
     public static void introspect(Object bean, ServletRequest request)
                                   throws JasperException
     {
@@ -313,6 +376,18 @@ public class JspRuntimeLibrary {
     // __end introspectMethod
 
     // __begin introspecthelperMethod
+    /**
+     * 辅助方法，用于对 JavaBean 进行自省并设置属性值。
+     * 支持数组类型的属性和单个属性。
+     *
+     * @param bean 目标 JavaBean
+     * @param prop 属性名称
+     * @param value 属性值
+     * @param request Servlet 请求对象
+     * @param param 参数名称
+     * @param ignoreMethodNF 是否忽略方法未找到的异常
+     * @throws JasperException 处理失败时抛出
+     */
     public static void introspecthelper(Object bean, String prop,
                                         String value, ServletRequest request,
                                         String param, boolean ignoreMethodNF)
@@ -396,38 +471,92 @@ public class JspRuntimeLibrary {
     // functions to convert builtin Java data types to string.
     //-------------------------------------------------------------------
     // __begin toStringMethod
+    /**
+     * 将对象转换为字符串。
+     *
+     * @param o 要转换的对象
+     * @return 字符串表示
+     */
     public static String toString(Object o) {
         return String.valueOf(o);
     }
 
+    /**
+     * 将字节转换为字符串。
+     *
+     * @param b 字节值
+     * @return 字符串表示
+     */
     public static String toString(byte b) {
         return Byte.toString(b);
     }
 
+    /**
+     * 将布尔值转换为字符串。
+     *
+     * @param b 布尔值
+     * @return 字符串表示
+     */
     public static String toString(boolean b) {
         return Boolean.toString(b);
     }
 
+    /**
+     * 将短整数转换为字符串。
+     *
+     * @param s 短整数值
+     * @return 字符串表示
+     */
     public static String toString(short s) {
         return Short.toString(s);
     }
 
+    /**
+     * 将整数转换为字符串。
+     *
+     * @param i 整数值
+     * @return 字符串表示
+     */
     public static String toString(int i) {
         return Integer.toString(i);
     }
 
+    /**
+     * 将单精度浮点数转换为字符串。
+     *
+     * @param f 单精度浮点数值
+     * @return 字符串表示
+     */
     public static String toString(float f) {
         return Float.toString(f);
     }
 
+    /**
+     * 将长整数转换为字符串。
+     *
+     * @param l 长整数值
+     * @return 字符串表示
+     */
     public static String toString(long l) {
         return Long.toString(l);
     }
 
+    /**
+     * 将双精度浮点数转换为字符串。
+     *
+     * @param d 双精度浮点数值
+     * @return 字符串表示
+     */
     public static String toString(double d) {
         return Double.toString(d);
     }
 
+    /**
+     * 将字符转换为字符串。
+     *
+     * @param c 字符值
+     * @return 字符串表示
+     */
     public static String toString(char c) {
         return Character.toString(c);
     }
@@ -600,6 +729,15 @@ public class JspRuntimeLibrary {
     }
 
     // __begin lookupReadMethodMethod
+    /**
+     * 处理获取属性的操作。
+     * 通过反射调用 JavaBean 的 getter 方法获取属性值。
+     *
+     * @param o 目标对象
+     * @param prop 属性名称
+     * @return 属性值
+     * @throws JasperException 处理失败时抛出
+     */
     public static Object handleGetProperty(Object o, String prop)
     throws JasperException {
         if (o == null) {
@@ -619,7 +757,17 @@ public class JspRuntimeLibrary {
     }
     // __end lookupReadMethodMethod
 
-    // handles <jsp:setProperty> with EL expression for 'value' attribute
+    /**
+     * 处理带有 EL 表达式的 setProperty 操作。
+     * 用于处理 <jsp:setProperty> 标签中 value 属性为 EL 表达式的情况。
+     *
+     * @param bean 目标 JavaBean
+     * @param prop 属性名称
+     * @param expression EL 表达式
+     * @param pageContext 页面上下文
+     * @param functionMapper 函数映射器
+     * @throws JasperException 处理失败时抛出
+     */
     public static void handleSetPropertyExpression(Object bean,
         String prop, String expression, PageContext pageContext,
         ProtectedFunctionMapper functionMapper )
@@ -641,6 +789,14 @@ public class JspRuntimeLibrary {
         }
     }
 
+    /**
+     * 处理 setProperty 操作，设置对象属性值。
+     *
+     * @param bean 目标 JavaBean
+     * @param prop 属性名称
+     * @param value 属性值
+     * @throws JasperException 处理失败时抛出
+     */
     public static void handleSetProperty(Object bean, String prop,
                                          Object value)
         throws JasperException
@@ -655,6 +811,14 @@ public class JspRuntimeLibrary {
         }
     }
 
+    /**
+     * 处理 setProperty 操作，设置整数属性值。
+     *
+     * @param bean 目标 JavaBean
+     * @param prop 属性名称
+     * @param value 整数值
+     * @throws JasperException 处理失败时抛出
+     */
     public static void handleSetProperty(Object bean, String prop,
                                          int value)
         throws JasperException
@@ -669,6 +833,14 @@ public class JspRuntimeLibrary {
         }
     }
 
+    /**
+     * 处理 setProperty 操作，设置短整数属性值。
+     *
+     * @param bean 目标 JavaBean
+     * @param prop 属性名称
+     * @param value 短整数值
+     * @throws JasperException 处理失败时抛出
+     */
     public static void handleSetProperty(Object bean, String prop,
                                          short value)
         throws JasperException
@@ -683,6 +855,14 @@ public class JspRuntimeLibrary {
         }
     }
 
+    /**
+     * 处理 setProperty 操作，设置长整数属性值。
+     *
+     * @param bean 目标 JavaBean
+     * @param prop 属性名称
+     * @param value 长整数值
+     * @throws JasperException 处理失败时抛出
+     */
     public static void handleSetProperty(Object bean, String prop,
                                          long value)
         throws JasperException
@@ -697,6 +877,14 @@ public class JspRuntimeLibrary {
         }
     }
 
+    /**
+     * 处理 setProperty 操作，设置双精度浮点数属性值。
+     *
+     * @param bean 目标 JavaBean
+     * @param prop 属性名称
+     * @param value 双精度浮点数值
+     * @throws JasperException 处理失败时抛出
+     */
     public static void handleSetProperty(Object bean, String prop,
                                          double value)
         throws JasperException
@@ -711,6 +899,14 @@ public class JspRuntimeLibrary {
         }
     }
 
+    /**
+     * 处理 setProperty 操作，设置单精度浮点数属性值。
+     *
+     * @param bean 目标 JavaBean
+     * @param prop 属性名称
+     * @param value 单精度浮点数值
+     * @throws JasperException 处理失败时抛出
+     */
     public static void handleSetProperty(Object bean, String prop,
                                          float value)
         throws JasperException
@@ -725,6 +921,14 @@ public class JspRuntimeLibrary {
         }
     }
 
+    /**
+     * 处理 setProperty 操作，设置字符属性值。
+     *
+     * @param bean 目标 JavaBean
+     * @param prop 属性名称
+     * @param value 字符值
+     * @throws JasperException 处理失败时抛出
+     */
     public static void handleSetProperty(Object bean, String prop,
                                          char value)
         throws JasperException
@@ -739,6 +943,14 @@ public class JspRuntimeLibrary {
         }
     }
 
+    /**
+     * 处理 setProperty 操作，设置字节属性值。
+     *
+     * @param bean 目标 JavaBean
+     * @param prop 属性名称
+     * @param value 字节值
+     * @throws JasperException 处理失败时抛出
+     */
     public static void handleSetProperty(Object bean, String prop,
                                          byte value)
         throws JasperException
@@ -753,6 +965,14 @@ public class JspRuntimeLibrary {
         }
     }
 
+    /**
+     * 处理 setProperty 操作，设置布尔属性值。
+     *
+     * @param bean 目标 JavaBean
+     * @param prop 属性名称
+     * @param value 布尔值
+     * @throws JasperException 处理失败时抛出
+     */
     public static void handleSetProperty(Object bean, String prop,
                                          boolean value)
         throws JasperException
@@ -781,6 +1001,14 @@ public class JspRuntimeLibrary {
         return new String(chars);
     }
 
+    /**
+     * 获取 JavaBean 的写方法（setter）。
+     *
+     * @param beanClass JavaBean 类
+     * @param prop 属性名称
+     * @return 写方法 Method 对象
+     * @throws JasperException 方法未找到时抛出
+     */
     public static Method getWriteMethod(Class<?> beanClass, String prop)
             throws JasperException {
         Method result = null;
@@ -821,6 +1049,14 @@ public class JspRuntimeLibrary {
         return result;
     }
 
+    /**
+     * 获取 JavaBean 的读方法（getter）。
+     *
+     * @param beanClass JavaBean 类
+     * @param prop 属性名称
+     * @return 读方法 Method 对象
+     * @throws JasperException 方法未找到时抛出
+     */
     public static Method getReadMethod(Class<?> beanClass, String prop)
             throws JasperException {
         Method result = null;
@@ -863,6 +1099,16 @@ public class JspRuntimeLibrary {
     //*********************************************************************
     // PropertyEditor Support
 
+    /**
+     * 使用指定的 PropertyEditor 类从字符串获取值。
+     *
+     * @param attrClass 属性类型
+     * @param attrName 属性名称
+     * @param attrValue 属性字符串值
+     * @param propertyEditorClass PropertyEditor 类
+     * @return 转换后的对象
+     * @throws JasperException 转换失败时抛出
+     */
     public static Object getValueFromBeanInfoPropertyEditor(
                            Class<?> attrClass, String attrName, String attrValue,
                            Class<?> propertyEditorClass)
@@ -884,6 +1130,15 @@ public class JspRuntimeLibrary {
         }
     }
 
+    /**
+     * 使用 PropertyEditorManager 从字符串获取值。
+     *
+     * @param attrClass 属性类型
+     * @param attrName 属性名称
+     * @param attrValue 属性字符串值
+     * @return 转换后的对象
+     * @throws JasperException 转换失败时抛出
+     */
     public static Object getValueFromPropertyEditorManager(
                      Class<?> attrClass, String attrName, String attrValue)
         throws JasperException
@@ -919,12 +1174,11 @@ public class JspRuntimeLibrary {
 
 
     /**
-     * Convert a possibly relative resource path into a context-relative
-     * resource path that starts with a '/'.
+     * 将可能相对的路径转换为以 '/' 开头的上下文相对路径。
      *
-     * @param request The servlet request we are processing
-     * @param relativePath The possibly relative resource path
-     * @return an absolute path
+     * @param request 正在处理的 Servlet 请求
+     * @param relativePath 可能相对的资源路径
+     * @return 绝对路径
      */
     public static String getContextRelativePath(ServletRequest request,
                                                 String relativePath) {
@@ -958,17 +1212,16 @@ public class JspRuntimeLibrary {
 
 
     /**
-     * Perform a RequestDispatcher.include() operation, with optional flushing
-     * of the response beforehand.
+     * 执行 RequestDispatcher.include() 操作，可选择在之前刷新响应。
      *
-     * @param request The servlet request we are processing
-     * @param response The servlet response we are processing
-     * @param relativePath The relative path of the resource to be included
-     * @param out The Writer to whom we are currently writing
-     * @param flush Should we flush before the include is processed?
+     * @param request 正在处理的 Servlet 请求
+     * @param response 正在处理的 Servlet 响应
+     * @param relativePath 要包含的资源的相对路径
+     * @param out 当前正在写入的 Writer
+     * @param flush 是否在包含处理之前刷新
      *
-     * @exception IOException if thrown by the included servlet
-     * @exception ServletException if thrown by the included servlet
+     * @exception IOException 如果被包含的 Servlet 抛出
+     * @exception ServletException 如果被包含的 Servlet 抛出
      */
     public static void include(ServletRequest request,
                                ServletResponse response,
@@ -1001,13 +1254,12 @@ public class JspRuntimeLibrary {
     }
 
     /**
-     * URL encodes a string, based on the supplied character encoding.
-     * This performs the same function as java.next.URLEncode.encode
-     * in J2SDK1.4, and should be removed if the only platform supported
-     * is 1.4 or higher.
-     * @param s The String to be URL encoded.
-     * @param enc The character encoding
-     * @return The URL encoded String
+     * 对字符串进行 URL 编码，基于提供的字符编码。
+     * 此方法执行与 J2SDK1.4 中的 java.net.URLEncoder.encode 相同的功能。
+     *
+     * @param s 要进行 URL 编码的字符串
+     * @param enc 字符编码
+     * @return URL 编码后的字符串
      */
     public static String URLEncode(String s, String enc) {
 
@@ -1075,6 +1327,15 @@ public class JspRuntimeLibrary {
     }
 
 
+    /**
+     * 开始缓冲标签体内容。
+     * 为 BodyTag 设置 BodyContent 并调用 doInitBody()。
+     *
+     * @param pageContext 页面上下文
+     * @param tag BodyTag 标签
+     * @return BodyContent 对象
+     * @throws JspException JSP 异常
+     */
     public static JspWriter startBufferedBody(PageContext pageContext, BodyTag tag)
             throws JspException {
         BodyContent out = pageContext.pushBody();
@@ -1084,6 +1345,14 @@ public class JspRuntimeLibrary {
     }
 
 
+    /**
+     * 释放标签实例。
+     * 根据 reused 参数决定是否释放标签。
+     *
+     * @param tag 要释放的标签
+     * @param instanceManager 实例管理器
+     * @param reused 是否重用
+     */
     public static void releaseTag(Tag tag, InstanceManager instanceManager, boolean reused) {
         // Caller ensures pool is non-null if reuse is true
         if (!reused) {

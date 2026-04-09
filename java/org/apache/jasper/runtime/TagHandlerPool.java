@@ -1,19 +1,3 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.apache.jasper.runtime;
 
 import javax.servlet.ServletConfig;
@@ -26,19 +10,23 @@ import org.apache.juli.logging.LogFactory;
 import org.apache.tomcat.InstanceManager;
 
 /**
- * Pool of tag handlers that can be reused.
+ * 标签处理器池，用于重用标签处理器实例。
  *
  * @author Jan Luehe
  */
 public class TagHandlerPool {
 
+    /** 标签处理器数组，存储可重用的处理器实例 */
     private Tag[] handlers;
 
+    /** 标签池类名配置选项 */
     public static final String OPTION_TAGPOOL = "tagpoolClassName";
+    /** 标签池最大大小配置选项 */
     public static final String OPTION_MAXSIZE = "tagpoolMaxSize";
 
-    // index of next available tag handler
+    /** 下一个可用标签处理器的索引 */
     private int current;
+    /** 实例管理器，用于创建和管理标签处理器实例 */
     protected InstanceManager instanceManager = null;
 
     public static TagHandlerPool getTagHandlerPool(ServletConfig config) {
@@ -89,14 +77,14 @@ public class TagHandlerPool {
     }
 
     /**
-     * Gets the next available tag handler from this tag handler pool,
-     * instantiating one if this tag handler pool is empty.
+     * 获取标签处理器。
+     * 从池中获取下一个可用的标签处理器，如果池为空则实例化一个新的。
      *
      * @param handlerClass
-     *            Tag handler class
-     * @return Reused or newly instantiated tag handler
+     *            标签处理器类
+     * @return 重用或新实例化的标签处理器
      * @throws JspException
-     *             if a tag handler cannot be instantiated
+     *             如果标签处理器无法实例化
      */
     public Tag get(Class<? extends Tag> handlerClass) throws JspException {
         Tag handler;
@@ -126,12 +114,11 @@ public class TagHandlerPool {
     }
 
     /**
-     * Adds the given tag handler to this tag handler pool, unless this tag
-     * handler pool has already reached its capacity, in which case the tag
-     * handler's release() method is called.
+     * 重用标签处理器。
+     * 将指定的标签处理器添加到池中，如果池已满则调用该处理器的 release() 方法。
      *
      * @param handler
-     *            Tag handler to add to this tag handler pool
+     *            要添加到池中的标签处理器
      */
     public void reuse(Tag handler) {
         synchronized (this) {
@@ -145,8 +132,8 @@ public class TagHandlerPool {
     }
 
     /**
-     * Calls the release() method of all available tag handlers in this tag
-     * handler pool.
+     * 释放池中的所有处理器。
+     * 调用池中所有可用标签处理器的 release() 方法。
      */
     public synchronized void release() {
         for (int i = current; i >= 0; i--) {

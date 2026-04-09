@@ -1,19 +1,3 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.apache.jasper.runtime;
 
 import java.io.CharArrayReader;
@@ -30,12 +14,11 @@ import org.apache.jasper.Constants;
 import org.apache.jasper.compiler.Localizer;
 
 /**
- * Write text to a character-output stream, buffering characters so as
- * to provide for the efficient writing of single characters, arrays,
- * and strings.
- *
- * Provide support for discarding for the output that has been buffered.
- *
+ * BodyContent 的实现类，用于 JSP 标签体内容处理。
+ * 
+ * 将文本写入字符输出流，通过缓冲字符来实现对单个字符、字符数组和字符串的高效写入。
+ * 支持丢弃已缓冲的输出内容。
+ * 
  * @author Rajiv Mordani
  * @author Jan Luehe
  */
@@ -75,9 +58,10 @@ public class BodyContentImpl extends BodyContent {
         }
     }
 
-
+    /** 字符缓冲区，用于存储标签体内容 */
     private char[] cb;
     private int nextChar;
+    /** 是否已关闭 */
     private boolean closed;
 
     /**
@@ -86,8 +70,9 @@ public class BodyContentImpl extends BodyContent {
     private Writer writer;
 
     /**
-     * Constructor.
-     * @param enclosingWriter The wrapped writer
+     * 构造方法。
+     * 
+     * @param enclosingWriter 被包装的 JspWriter 写入器
      */
     public BodyContentImpl(JspWriter enclosingWriter) {
         super(enclosingWriter);
@@ -97,6 +82,12 @@ public class BodyContentImpl extends BodyContent {
         closed = false;
     }
 
+    /**
+     * 写入单个字符。
+     * 
+     * @param c 要写入的字符（低16位）
+     * @throws IOException 如果发生 I/O 错误
+     */
     @Override
     public void write(int c) throws IOException {
         if (writer != null) {
@@ -110,6 +101,14 @@ public class BodyContentImpl extends BodyContent {
         }
     }
 
+    /**
+     * 写入字符数组的一部分。
+     * 
+     * @param cbuf 字符数组
+     * @param off  起始偏移量
+     * @param len  要写入的字符数
+     * @throws IOException 如果发生 I/O 错误
+     */
     @Override
     public void write(char[] cbuf, int off, int len) throws IOException {
         if (writer != null) {
@@ -133,6 +132,12 @@ public class BodyContentImpl extends BodyContent {
         }
     }
 
+    /**
+     * 写入整个字符数组。
+     * 
+     * @param buf 要写入的字符数组
+     * @throws IOException 如果发生 I/O 错误
+     */
     @Override
     public void write(char[] buf) throws IOException {
         if (writer != null) {
@@ -142,6 +147,14 @@ public class BodyContentImpl extends BodyContent {
         }
     }
 
+    /**
+     * 写入字符串的一部分。
+     * 
+     * @param s   要写入的字符串
+     * @param off 起始偏移量
+     * @param len 要写入的字符数
+     * @throws IOException 如果发生 I/O 错误
+     */
     @Override
     public void write(String s, int off, int len) throws IOException {
         if (writer != null) {
@@ -157,6 +170,12 @@ public class BodyContentImpl extends BodyContent {
         }
     }
 
+    /**
+     * 写入整个字符串。
+     * 
+     * @param s 要写入的字符串
+     * @throws IOException 如果发生 I/O 错误
+     */
     @Override
     public void write(String s) throws IOException {
         if (writer != null) {
@@ -318,6 +337,11 @@ public class BodyContentImpl extends BodyContent {
         println();
     }
 
+    /**
+     * 清空缓冲区，丢弃所有已缓冲的输出内容。
+     * 
+     * @throws IOException 如果流已关闭或发生 I/O 错误
+     */
     @Override
     public void clear() throws IOException {
         if (writer != null) {
@@ -331,6 +355,11 @@ public class BodyContentImpl extends BodyContent {
         }
     }
 
+    /**
+     * 清空缓冲区内容，但不抛出异常（与 clear() 的区别是不会在 writer 不为 null 时抛出异常）。
+     * 
+     * @throws IOException 如果发生 I/O 错误
+     */
     @Override
     public void clearBuffer() throws IOException {
         if (writer == null) {
@@ -338,6 +367,12 @@ public class BodyContentImpl extends BodyContent {
         }
     }
 
+    /**
+     * 关闭此 BodyContent。
+     * 关闭后，写入操作将抛出 IOException。
+     * 
+     * @throws IOException 如果发生 I/O 错误
+     */
     @Override
     public void close() throws IOException {
         if (writer != null) {
@@ -361,11 +396,21 @@ public class BodyContentImpl extends BodyContent {
         return (writer == null) ? bufferSize-nextChar : 0;
     }
 
+    /**
+     * 获取一个 Reader 来读取缓冲区中的内容。
+     * 
+     * @return 包含缓冲区内容的 Reader，如果 writer 不为 null 则返回 null
+     */
     @Override
     public Reader getReader() {
         return (writer == null) ? new CharArrayReader (cb, 0, nextChar) : null;
     }
 
+    /**
+     * 将缓冲区内容作为字符串返回。
+     * 
+     * @return 缓冲区中的字符串内容，如果 writer 不为 null 则返回 null
+     */
     @Override
     public String getString() {
         return (writer == null) ? new String(cb, 0, nextChar) : null;

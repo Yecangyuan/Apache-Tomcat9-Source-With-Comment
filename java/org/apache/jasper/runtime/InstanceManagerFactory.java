@@ -1,19 +1,3 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.apache.jasper.runtime;
 
 import javax.servlet.ServletConfig;
@@ -21,11 +5,38 @@ import javax.servlet.ServletConfig;
 import org.apache.jasper.compiler.Localizer;
 import org.apache.tomcat.InstanceManager;
 
+/**
+ * InstanceManager 工厂类。
+ * <p>
+ * 用于从 ServletContext 中获取 InstanceManager 实例的工厂类。
+ * InstanceManager 负责管理 JSP 页面中使用的对象实例的创建和销毁。
+ * </p>
+ *
+ * @author 作者未详
+ * @since Tomcat 版本未详
+ */
 public class InstanceManagerFactory {
 
+    /**
+     * 私有构造方法，防止外部实例化。
+     * <p>
+     * 这是一个工具类/工厂类，不需要创建实例。
+     * </p>
+     */
     private InstanceManagerFactory() {
     }
 
+    /**
+     * 从 ServletConfig 中获取 InstanceManager 实例。
+     * <p>
+     * 该方法从 ServletContext 的属性中检索 InstanceManager 实例。
+     * 如果找不到 InstanceManager，则抛出 IllegalStateException 异常。
+     * </p>
+     *
+     * @param config ServletConfig 对象，用于访问 ServletContext
+     * @return InstanceManager 实例
+     * @throws IllegalStateException 如果 ServletContext 中没有设置 InstanceManager
+     */
     public static InstanceManager getInstanceManager(ServletConfig config) {
         InstanceManager instanceManager =
                 (InstanceManager) config.getServletContext().getAttribute(InstanceManager.class.getName());
