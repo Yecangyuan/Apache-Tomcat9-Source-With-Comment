@@ -1,30 +1,25 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package javax.websocket;
 
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 表示 WebSocket 握手响应的接口。
+ *
+ * @since WebSocket 1.0
+ * @version WebSocket 1.1
+ */
 public interface HandshakeResponse {
 
     /**
-     * Name of the WebSocket accept HTTP header.
+     * WebSocket 接受 HTTP 头的名称。
      */
     String SEC_WEBSOCKET_ACCEPT = "Sec-WebSocket-Accept";
 
+    /**
+     * 返回 HTTP 响应头。
+     *
+     * @return HTTP 响应头的映射，其中键为头名称，值为头值列表
+     */
     Map<String,List<String>> getHeaders();
 }

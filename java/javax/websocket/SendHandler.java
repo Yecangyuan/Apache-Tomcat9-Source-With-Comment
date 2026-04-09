@@ -1,22 +1,21 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package javax.websocket;
 
+/**
+ * 异步发送结果的回调接口。
+ * 当使用 {@link RemoteEndpoint.Async} 的异步发送方法发送消息时，
+ * 可以通过此接口接收发送操作的结果通知（成功或失败）。
+ *
+ * @author 翻译者
+ * @see javax.websocket.RemoteEndpoint.Async
+ * @see javax.websocket.SendResult
+ */
 public interface SendHandler {
 
+    /**
+     * 当异步消息发送完成时调用此方法。
+     * 无论发送成功还是失败，都会触发此回调。
+     *
+     * @param result 发送结果对象，包含发送是否成功的状态以及可能的异常信息
+     */
     void onResult(SendResult result);
 }

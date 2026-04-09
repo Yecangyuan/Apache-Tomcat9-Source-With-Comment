@@ -1,34 +1,35 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package javax.websocket;
 
+/**
+ * 与WebSocket会话相关的异常类。
+ * 当WebSocket会话操作出现问题时抛出此异常。
+ */
 public class SessionException extends Exception {
 
     private static final long serialVersionUID = 1L;
 
+    /** 与此异常关联的WebSocket会话 */
     private final Session session;
 
 
+    /**
+     * 构造一个新的SessionException实例。
+     *
+     * @param message 异常的详细消息
+     * @param cause 异常的原因（可以为null）
+     * @param session 与此异常关联的WebSocket会话
+     */
     public SessionException(String message, Throwable cause, Session session) {
         super(message, cause);
         this.session = session;
     }
 
 
+    /**
+     * 获取与此异常关联的WebSocket会话。
+     *
+     * @return 与此异常关联的WebSocket会话
+     */
     public Session getSession() {
         return session;
     }

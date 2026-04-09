@@ -1,32 +1,16 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package javax.websocket;
 
 import java.nio.ByteBuffer;
 
 /**
- * Represents a WebSocket Pong message and used by message handlers to enable applications to process the response to
- * any Pings they send.
+ * 表示 WebSocket Pong 消息，用于接收 pong 响应的接口。
+ * 消息处理器使用此接口使应用程序能够处理其发送的任何 Ping 的响应。
  */
 public interface PongMessage {
     /**
-     * Get the payload of the Pong message.
+     * 获取 Pong 消息的有效负载。
      *
-     * @return The payload of the Pong message.
+     * @return Pong 消息的有效负载。
      */
     ByteBuffer getApplicationData();
 }

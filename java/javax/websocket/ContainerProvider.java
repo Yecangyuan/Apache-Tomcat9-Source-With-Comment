@@ -1,35 +1,20 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package javax.websocket;
 
 import java.util.Iterator;
 import java.util.ServiceLoader;
 
 /**
- * Use the {@link ServiceLoader} mechanism to provide instances of the WebSocket client container.
+ * 使用 {@link ServiceLoader} 机制来提供 WebSocket 客户端容器实例。
  */
 public abstract class ContainerProvider {
 
+    // 默认的 WebSocket 容器提供类名，用于回退机制
     private static final String DEFAULT_PROVIDER_CLASS_NAME = "org.apache.tomcat.websocket.WsWebSocketContainer";
 
     /**
-     * Create a new container used to create outgoing WebSocket connections.
+     * 创建一个新的容器，用于创建传出的 WebSocket 连接。
      *
-     * @return A newly created container.
+     * @return 新创建的容器。
      */
     public static WebSocketContainer getWebSocketContainer() {
         WebSocketContainer result = null;
