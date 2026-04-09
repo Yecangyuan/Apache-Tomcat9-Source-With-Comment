@@ -1,19 +1,3 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.apache.juli;
 
 import java.io.File;
@@ -42,9 +26,11 @@ import java.util.logging.Logger;
 
 
 /**
- * Per classloader LogManager implementation. For light debugging, set the system property
- * <code>org.apache.juli.ClassLoaderLogManager.debug=true</code>. Short configuration information will be sent to
- * <code>System.err</code>.
+ * 基于类加载器的 LogManager 实现。
+ * 支持每个类加载器拥有独立的日志配置，实现应用程序之间的日志隔离。
+ * 用于轻量级调试时，可以设置系统属性
+ * <code>org.apache.juli.ClassLoaderLogManager.debug=true</code>。
+ * 简短的配置信息将被输出到 <code>System.err</code>。
  */
 public class ClassLoaderLogManager extends LogManager {
 
@@ -92,22 +78,24 @@ public class ClassLoaderLogManager extends LogManager {
 
 
     /**
-     * Map containing the classloader information, keyed per classloader. A weak hashmap is used to ensure no
-     * classloader reference is leaked from application redeployment.
+     * 类加载器日志信息映射。
+     * 键为类加载器，值为该类加载器对应的 ClassLoaderLogInfo。
+     * 使用 WeakHashMap 确保在应用程序重新部署时不会造成类加载器引用泄漏。
      */
     protected final Map<ClassLoader, ClassLoaderLogInfo> classLoaderLoggers = new WeakHashMap<>(); // Guarded by this
 
 
     /**
-     * This prefix is used to allow using prefixes for the properties names of handlers and their subcomponents.
+     * 属性名前缀。
+     * 允许为处理器及其子组件的属性名称使用前缀。
      */
     protected final ThreadLocal<String> prefix = new ThreadLocal<>();
 
 
     /**
-     * Determines if the shutdown hook is used to perform any necessary clean-up such as flushing buffered handlers on
-     * JVM shutdown. Defaults to <code>true</code> but may be set to false if another component ensures that
-     * {@link #shutdown()} is called.
+     * 是否使用关闭钩子。
+     * 决定是否在 JVM 关闭时使用关闭钩子执行必要的清理操作（如刷新缓冲处理器）。
+     * 默认为 <code>true</code>，但如果其他组件确保调用 {@link #shutdown()}，则可以设置为 false。
      */
     protected volatile boolean useShutdownHook = true;
 
@@ -129,9 +117,10 @@ public class ClassLoaderLogManager extends LogManager {
 
 
     /**
-     * Add the specified logger to the classloader local configuration.
+     * 添加日志记录器。
+     * 将指定的日志记录器添加到类加载器本地配置中。
      *
-     * @param logger The logger to be added
+     * @param logger 要添加的日志记录器
      */
     @Override
     public synchronized boolean addLogger(final Logger logger) {
@@ -218,11 +207,11 @@ public class ClassLoaderLogManager extends LogManager {
 
 
     /**
-     * Get the logger associated with the specified name inside the classloader local configuration. If this returns
-     * null, and the call originated for Logger.getLogger, a new logger with the specified name will be instantiated and
-     * added using addLogger.
+     * 获取日志记录器。
+     * 获取类加载器本地配置中与指定名称关联的日志记录器。
+     * 如果返回 null，且调用来自 Logger.getLogger，则会实例化并添加一个具有指定名称的新日志记录器。
      *
-     * @param name The name of the logger to retrieve
+     * @param name 要检索的日志记录器名称
      */
     @Override
     public synchronized Logger getLogger(final String name) {
@@ -242,9 +231,10 @@ public class ClassLoaderLogManager extends LogManager {
 
 
     /**
-     * Get the value of the specified property in the classloader local configuration.
+     * 获取属性。
+     * 获取类加载器本地配置中指定属性的值。
      *
-     * @param name The property name
+     * @param name 属性名称
      */
     @Override
     public String getProperty(String name) {
@@ -337,7 +327,8 @@ public class ClassLoaderLogManager extends LogManager {
     }
 
     /**
-     * Shuts down the logging system.
+     * 关闭日志系统。
+     * JVM 正在关闭时，确保关闭所有类加载器的所有日志记录器。
      */
     public synchronized void shutdown() {
         // The JVM is being shutdown. Make sure all loggers for all class
@@ -678,6 +669,10 @@ public class ClassLoaderLogManager extends LogManager {
 
     // ---------------------------------------------------- LogNode Inner Class
 
+    /**
+     * 日志节点。
+     * 用于构建日志记录器的树形结构，支持层级查找和父子关系管理。
+     */
     protected static final class LogNode {
         Logger logger;
 
@@ -745,6 +740,14 @@ public class ClassLoaderLogManager extends LogManager {
     // -------------------------------------------- ClassLoaderInfo Inner Class
 
 
+    /**
+     * 类加载器日志信息。
+     * 存储与特定类加载器相关的所有日志配置信息，包括：
+     * - 根日志节点
+     * - 该 classloader 下的所有日志记录器
+     * - 处理器映射
+     * - 配置属性
+     */
     protected static final class ClassLoaderLogInfo {
         final LogNode rootNode;
         final Map<String, Logger> loggers = new ConcurrentHashMap<>();
@@ -762,7 +765,8 @@ public class ClassLoaderLogManager extends LogManager {
 
 
     /**
-     * This class is needed to instantiate the root of each per classloader hierarchy.
+     * 根日志记录器。
+     * 用于实例化每个类加载器层级结构的根日志记录器。
      */
     protected static class RootLogger extends Logger {
         public RootLogger() {

@@ -1,19 +1,3 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.apache.juli;
 
 import java.io.BufferedOutputStream;
@@ -50,35 +34,34 @@ import java.util.logging.LogRecord;
 import java.util.regex.Pattern;
 
 /**
- * Implementation of <b>Handler</b> that appends log messages to a file named {prefix}{date}{suffix} in a configured
- * directory.
+ * Handler 的实现类，将日志消息追加到文件中，文件名为 {prefix}{date}{suffix} 格式，存储在配置的目录中。
+ * 支持按日期轮转日志文件。
  * <p>
- * The following configuration properties are available:
+ * 可用配置属性如下：
  * </p>
  * <ul>
- * <li><code>directory</code> - The directory where to create the log file. If the path is not absolute, it is relative
- * to the current working directory of the application. The Apache Tomcat configuration files usually specify an
- * absolute path for this property, <code>${catalina.base}/logs</code> Default value: <code>logs</code></li>
- * <li><code>rotatable</code> - If <code>true</code>, the log file will be rotated on the first write past midnight and
- * the filename will be <code>{prefix}{date}{suffix}</code>, where date is yyyy-MM-dd. If <code>false</code>, the file
- * will not be rotated and the filename will be <code>{prefix}{suffix}</code>. Default value: <code>true</code></li>
- * <li><code>prefix</code> - The leading part of the log file name. Default value: <code>juli.</code></li>
- * <li><code>suffix</code> - The trailing part of the log file name. Default value: <code>.log</code></li>
- * <li><code>bufferSize</code> - Configures buffering. The value of <code>0</code> uses system default buffering
- * (typically an 8K buffer will be used). A value of <code>&lt;0</code> forces a writer flush upon each log write. A
- * value <code>&gt;0</code> uses a BufferedOutputStream with the defined value but note that the system default
- * buffering will also be applied. Default value: <code>-1</code></li>
- * <li><code>encoding</code> - Character set used by the log file. Default value: empty string, which means to use the
- * system default character set.</li>
- * <li><code>level</code> - The level threshold for this Handler. See the <code>java.util.logging.Level</code> class for
- * the possible levels. Default value: <code>ALL</code></li>
- * <li><code>filter</code> - The <code>java.util.logging.Filter</code> implementation class name for this Handler.
- * Default value: unset</li>
- * <li><code>formatter</code> - The <code>java.util.logging.Formatter</code> implementation class name for this Handler.
- * Default value: <code>org.apache.juli.OneLineFormatter</code></li>
- * <li><code>maxDays</code> - The maximum number of days to keep the log files. If the specified value is
- * <code>&lt;=0</code> then the log files will be kept on the file system forever, otherwise they will be kept the
- * specified maximum days. Default value: <code>-1</code>.</li>
+ * <li><code>directory</code> - 创建日志文件的目录。如果路径不是绝对路径，则相对于应用程序的当前工作目录。
+ *     Apache Tomcat 配置文件通常为此属性指定绝对路径 <code>${catalina.base}/logs</code>。
+ *     默认值：<code>logs</code></li>
+ * <li><code>rotatable</code> - 如果为 <code>true</code>，日志文件将在午夜后首次写入时轮转，
+ *     文件名为 <code>{prefix}{date}{suffix}</code>，其中 date 为 yyyy-MM-dd 格式。
+ *     如果为 <code>false</code>，文件不会轮转，文件名为 <code>{prefix}{suffix}</code>。
+ *     默认值：<code>true</code></li>
+ * <li><code>prefix</code> - 日志文件名的前缀部分。默认值：<code>juli.</code></li>
+ * <li><code>suffix</code> - 日志文件名的后缀部分。默认值：<code>.log</code></li>
+ * <li><code>bufferSize</code> - 配置缓冲。<code>0</code> 使用系统默认缓冲（通常使用 8K 缓冲区）。
+ *     <code>&lt;0</code> 强制每次日志写入都刷新写入器。<code>&gt;0</code> 使用指定大小的 BufferedOutputStream，
+ *     但注意系统默认缓冲也会应用。默认值：<code>-1</code></li>
+ * <li><code>encoding</code> - 日志文件使用的字符集。默认值：空字符串，表示使用系统默认字符集。</li>
+ * <li><code>level</code> - 此 Handler 的级别阈值。参见 <code>java.util.logging.Level</code> 类了解可能的级别。
+ *     默认值：<code>ALL</code></li>
+ * <li><code>filter</code> - 此 Handler 的 <code>java.util.logging.Filter</code> 实现类名。
+ *     默认值：未设置</li>
+ * <li><code>formatter</code> - 此 Handler 的 <code>java.util.logging.Formatter</code> 实现类名。
+ *     默认值：<code>org.apache.juli.OneLineFormatter</code></li>
+ * <li><code>maxDays</code> - 保留日志文件的最大天数。如果指定值 <code>&lt;=0</code>，
+ *     则日志文件将永久保留在文件系统上，否则将保留指定的最大天数。
+ *     默认值：<code>-1</code>。</li>
  * </ul>
  */
 public class FileHandler extends Handler {
@@ -127,61 +110,61 @@ public class FileHandler extends Handler {
 
 
     /**
-     * The as-of date for the currently open log file, or a zero-length string if there is no open log file.
+     * 当前日志文件的日期，如果没有打开的日志文件则为空字符串。
      */
     private volatile String date = "";
 
 
     /**
-     * The directory in which log files are created.
+     * 创建日志文件的目录。
      */
     private String directory;
 
 
     /**
-     * The prefix that is added to log file filenames.
+     * 添加到日志文件名的前缀。
      */
     private String prefix;
 
 
     /**
-     * The suffix that is added to log file filenames.
+     * 添加到日志文件名的后缀。
      */
     private String suffix;
 
 
     /**
-     * Determines whether the log file is rotatable
+     * 决定是否轮转日志文件。
      */
     private Boolean rotatable;
 
 
     /**
-     * Maximum number of days to keep the log files
+     * 保留日志文件的最大天数。
      */
     private Integer maxDays;
 
 
     /**
-     * The PrintWriter to which we are currently logging, if any.
+     * 当前日志写入的输出写入器（如果有）。
      */
     private volatile PrintWriter writer = null;
 
 
     /**
-     * Lock used to control access to the writer.
+     * 用于控制对写入器访问的锁。
      */
     protected final ReadWriteLock writerLock = new ReentrantReadWriteLock();
 
 
     /**
-     * Log buffer size.
+     * 日志缓冲区大小。
      */
     private Integer bufferSize;
 
 
     /**
-     * Represents a file name pattern of type {prefix}{date}{suffix}. The date is YYYY-MM-DD
+     * 表示 {prefix}{date}{suffix} 类型的文件名模式。日期格式为 YYYY-MM-DD。
      */
     private Pattern pattern;
 
@@ -190,9 +173,9 @@ public class FileHandler extends Handler {
 
 
     /**
-     * Format and publish a <code>LogRecord</code>.
+     * 格式化并发布日志记录。
      *
-     * @param record description of the log event
+     * @param record 日志事件的描述
      */
     @Override
     public void publish(LogRecord record) {
@@ -201,19 +184,19 @@ public class FileHandler extends Handler {
             return;
         }
 
-        // Construct the timestamp we will use, if requested
+        // 构建时间戳
         Timestamp ts = new Timestamp(System.currentTimeMillis());
         String tsDate = ts.toString().substring(0, 10);
 
         writerLock.readLock().lock();
         try {
-            // If the date has changed, switch log files
+            // 如果日期已更改，切换日志文件
             if (rotatable.booleanValue() && !date.equals(tsDate)) {
-                // Upgrade to writeLock before we switch
+                // 在切换前升级为写锁
                 writerLock.readLock().unlock();
                 writerLock.writeLock().lock();
                 try {
-                    // Make sure another thread hasn't already done this
+                    // 确保其他线程尚未完成此操作
                     if (!date.equals(tsDate)) {
                         closeWriter();
                         date = tsDate;
@@ -221,8 +204,7 @@ public class FileHandler extends Handler {
                         clean();
                     }
                 } finally {
-                    // Downgrade to read-lock. This ensures the writer remains valid
-                    // until the log message is written
+                    // 降级为读锁。这确保在写入日志消息前写入器保持有效
                     writerLock.readLock().lock();
                     writerLock.writeLock().unlock();
                 }
@@ -259,13 +241,16 @@ public class FileHandler extends Handler {
 
 
     /**
-     * Close the currently open log file (if any).
+     * 关闭当前打开的日志文件（如果有）。
      */
     @Override
     public void close() {
         closeWriter();
     }
 
+    /**
+     * 关闭写入器。
+     */
     protected void closeWriter() {
 
         writerLock.writeLock().lock();
@@ -287,7 +272,7 @@ public class FileHandler extends Handler {
 
 
     /**
-     * Flush the writer.
+     * 刷新缓冲区。
      */
     @Override
     public void flush() {
@@ -308,18 +293,18 @@ public class FileHandler extends Handler {
 
 
     /**
-     * Configure from <code>LogManager</code> properties.
+     * 从 LogManager 属性中配置。
      */
     private void configure() {
 
         Timestamp ts = new Timestamp(System.currentTimeMillis());
         date = ts.toString().substring(0, 10);
 
-        String className = this.getClass().getName(); // allow classes to override
+        String className = this.getClass().getName(); // 允许类覆盖
 
         ClassLoader cl = ClassLoaderLogManager.getClassLoader();
 
-        // Retrieve configuration of logging file name
+        // 检索日志文件名的配置
         if (rotatable == null) {
             rotatable = Boolean.valueOf(getProperty(className + ".rotatable", "true"));
         }
@@ -335,8 +320,7 @@ public class FileHandler extends Handler {
 
         // https://bz.apache.org/bugzilla/show_bug.cgi?id=61232
         boolean shouldCheckForRedundantSeparator = !rotatable.booleanValue() && !prefix.isEmpty() && !suffix.isEmpty();
-        // assuming separator is just one char, if there are use cases with
-        // more, the notion of separator might be introduced
+        // 假设分隔符只是一个字符，如果有更多用例，可能需要引入分隔符的概念
         if (shouldCheckForRedundantSeparator && (prefix.charAt(prefix.length() - 1) == suffix.charAt(0))) {
             suffix = suffix.substring(1);
         }
@@ -362,43 +346,43 @@ public class FileHandler extends Handler {
             }
         }
 
-        // Get encoding for the logging file
+        // 获取日志文件的编码
         String encoding = getProperty(className + ".encoding", null);
         if (encoding != null && encoding.length() > 0) {
             try {
                 setEncoding(encoding);
             } catch (UnsupportedEncodingException ex) {
-                // Ignore
+                // 忽略
             }
         }
 
-        // Get logging level for the handler
+        // 获取处理器的日志级别
         setLevel(Level.parse(getProperty(className + ".level", "" + Level.ALL)));
 
-        // Get filter configuration
+        // 获取过滤器配置
         String filterName = getProperty(className + ".filter", null);
         if (filterName != null) {
             try {
                 setFilter((Filter) cl.loadClass(filterName).getConstructor().newInstance());
             } catch (Exception e) {
-                // Ignore
+                // 忽略
             }
         }
 
-        // Set formatter
+        // 设置格式化器
         String formatterName = getProperty(className + ".formatter", null);
         if (formatterName != null) {
             try {
                 setFormatter((Formatter) cl.loadClass(formatterName).getConstructor().newInstance());
             } catch (Exception e) {
-                // Ignore and fallback to defaults
+                // 忽略并回退到默认值
                 setFormatter(new OneLineFormatter());
             }
         } else {
             setFormatter(new OneLineFormatter());
         }
 
-        // Set error manager
+        // 设置错误管理器
         setErrorManager(new ErrorManager());
     }
 
@@ -415,15 +399,18 @@ public class FileHandler extends Handler {
 
 
     /**
-     * Open the new log file for the date specified by <code>date</code>.
+     * 为 <code>date</code> 指定的日期打开新的日志文件。
      */
     protected void open() {
         openWriter();
     }
 
+    /**
+     * 打开写入器。
+     */
     protected void openWriter() {
 
-        // Create the directory if necessary
+        // 如有必要，创建目录
         File dir = new File(directory);
         if (!dir.mkdirs() && !dir.isDirectory()) {
             reportError("Unable to create [" + dir + "]", null, ErrorManager.OPEN_FAILURE);
@@ -431,7 +418,7 @@ public class FileHandler extends Handler {
             return;
         }
 
-        // Open the current log file
+        // 打开当前日志文件
         writerLock.writeLock().lock();
         FileOutputStream fos = null;
         OutputStream os = null;
@@ -456,14 +443,14 @@ public class FileHandler extends Handler {
                 try {
                     fos.close();
                 } catch (IOException e1) {
-                    // Ignore
+                    // 忽略
                 }
             }
             if (os != null) {
                 try {
                     os.close();
                 } catch (IOException e1) {
-                    // Ignore
+                    // 忽略
                 }
             }
         } finally {
@@ -471,6 +458,9 @@ public class FileHandler extends Handler {
         }
     }
 
+    /**
+     * 清理旧日志文件。
+     */
     private void clean() {
         if (maxDays.intValue() <= 0 || Files.notExists(getDirectoryAsPath())) {
             return;
@@ -497,7 +487,7 @@ public class FileHandler extends Handler {
                     LocalDate dateFromFile = LocalDate.from(DateTimeFormatter.ISO_LOCAL_DATE.parse(date));
                     result = dateFromFile.isBefore(maxDaysOffset);
                 } catch (DateTimeException e) {
-                    // no-op
+                    // 无操作
                 }
             }
             return result;
@@ -522,6 +512,9 @@ public class FileHandler extends Handler {
         }
     }
 
+    /**
+     * 线程工厂类，用于创建日志文件清理线程。
+     */
     protected static final class ThreadFactory implements java.util.concurrent.ThreadFactory {
         private final String namePrefix;
         private final boolean isSecurityEnabled;
@@ -543,7 +536,7 @@ public class FileHandler extends Handler {
         @Override
         public Thread newThread(Runnable r) {
             Thread t = new Thread(group, r, namePrefix + threadNumber.getAndIncrement());
-            // Threads should not have as context classloader a webapp classloader
+            // 线程不应将 Webapp 类加载器作为上下文类加载器
             if (isSecurityEnabled) {
                 AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
                     t.setContextClassLoader(ThreadFactory.class.getClassLoader());

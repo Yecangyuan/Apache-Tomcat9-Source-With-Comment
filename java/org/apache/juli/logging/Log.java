@@ -1,58 +1,34 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.apache.juli.logging;
 
 /**
- * <p>A simple logging interface abstracting logging APIs.  In order to be
- * instantiated successfully by {@link LogFactory}, classes that implement
- * this interface must have a constructor that takes a single String
- * parameter representing the "name" of this Log.</p>
+ * <p>一个简单的日志接口，抽象了各种日志API。为了能够被 {@link LogFactory} 成功实例化，
+ * 实现此接口的类必须有一个接受单个字符串参数的构造函数，该字符串参数表示此日志的"名称"。</p>
  *
- * <p> The six logging levels used by <code>Log</code> are (in order):</p>
+ * <p><code>Log</code> 使用的六个日志级别（按严重程度从低到高排序）如下：</p>
  * <ol>
- * <li>trace (the least serious)</li>
- * <li>debug</li>
- * <li>info</li>
- * <li>warn</li>
- * <li>error</li>
- * <li>fatal (the most serious)</li>
+ * <li>trace（最轻微的）</li>
+ * <li>debug（调试）</li>
+ * <li>info（信息）</li>
+ * <li>warn（警告）</li>
+ * <li>error（错误）</li>
+ * <li>fatal（最严重的）</li>
  * </ol>
- * <p>The mapping of these log levels to the concepts used by the underlying
- * logging system is implementation dependent.
- * The implementation should ensure, though, that this ordering behaves
- * as expected.</p>
+ * <p>这些日志级别到底层日志系统所使用概念的映射取决于具体实现。
+ * 但实现应确保此排序按预期工作。</p>
  *
- * <p>Performance is often a logging concern.
- * By examining the appropriate property,
- * a component can avoid expensive operations (producing information
- * to be logged).</p>
+ * <p>性能通常是日志记录的一个关注点。通过检查适当的属性，
+ * 组件可以避免执行昂贵的操作（生成要记录的信息）。</p>
  *
- * <p> For example,
+ * <p>例如：
  * <code>
  *    if (log.isDebugEnabled()) {
- *        ... do something expensive ...
+ *        ... 执行某些昂贵的操作 ...
  *        log.debug(theResult);
  *    }
  * </code>
  * </p>
  *
- * <p>Configuration of the underlying logging system will generally be done
- * external to the Logging APIs, through whatever mechanism is supported by
- * that system.</p>
+ * <p>底层日志系统的配置通常通过该日志系统所支持的机制在日志API外部完成。</p>
  *
  * @author <a href="mailto:sanders@apache.org">Scott Sanders</a>
  * @author Rod Waldhoff
@@ -64,79 +40,67 @@ public interface Log {
 
 
     /**
-     * <p> Is debug logging currently enabled? </p>
+     * <p>当前是否启用了 debug 级别日志记录？</p>
      *
-     * <p> Call this method to prevent having to perform expensive operations
-     * (for example, <code>String</code> concatenation)
-     * when the log level is more than debug. </p>
+     * <p>调用此方法可以避免在日志级别高于 debug 时执行昂贵的操作
+     * （例如，<code>String</code> 拼接）。</p>
      *
-     * @return <code>true</code> if debug level logging is enabled, otherwise
-     *         <code>false</code>
+     * @return 如果启用了 debug 级别日志记录则返回 <code>true</code>，否则返回 <code>false</code>
      */
     boolean isDebugEnabled();
 
 
     /**
-     * <p> Is error logging currently enabled? </p>
+     * <p>当前是否启用了 error 级别日志记录？</p>
      *
-     * <p> Call this method to prevent having to perform expensive operations
-     * (for example, <code>String</code> concatenation)
-     * when the log level is more than error. </p>
+     * <p>调用此方法可以避免在日志级别高于 error 时执行昂贵的操作
+     * （例如，<code>String</code> 拼接）。</p>
      *
-     * @return <code>true</code> if error level logging is enabled, otherwise
-     *         <code>false</code>
+     * @return 如果启用了 error 级别日志记录则返回 <code>true</code>，否则返回 <code>false</code>
      */
     boolean isErrorEnabled();
 
 
     /**
-     * <p> Is fatal logging currently enabled? </p>
+     * <p>当前是否启用了 fatal 级别日志记录？</p>
      *
-     * <p> Call this method to prevent having to perform expensive operations
-     * (for example, <code>String</code> concatenation)
-     * when the log level is more than fatal. </p>
+     * <p>调用此方法可以避免在日志级别高于 fatal 时执行昂贵的操作
+     * （例如，<code>String</code> 拼接）。</p>
      *
-     * @return <code>true</code> if fatal level logging is enabled, otherwise
-     *         <code>false</code>
+     * @return 如果启用了 fatal 级别日志记录则返回 <code>true</code>，否则返回 <code>false</code>
      */
     boolean isFatalEnabled();
 
 
     /**
-     * <p> Is info logging currently enabled? </p>
+     * <p>当前是否启用了 info 级别日志记录？</p>
      *
-     * <p> Call this method to prevent having to perform expensive operations
-     * (for example, <code>String</code> concatenation)
-     * when the log level is more than info. </p>
+     * <p>调用此方法可以避免在日志级别高于 info 时执行昂贵的操作
+     * （例如，<code>String</code> 拼接）。</p>
      *
-     * @return <code>true</code> if info level logging is enabled, otherwise
-     *         <code>false</code>
+     * @return 如果启用了 info 级别日志记录则返回 <code>true</code>，否则返回 <code>false</code>
      */
     boolean isInfoEnabled();
 
 
     /**
-     * <p> Is trace logging currently enabled? </p>
+     * <p>当前是否启用了 trace 级别日志记录？</p>
      *
-     * <p> Call this method to prevent having to perform expensive operations
-     * (for example, <code>String</code> concatenation)
-     * when the log level is more than trace. </p>
+     * <p>调用此方法可以避免在日志级别高于 trace 时执行昂贵的操作
+     * （例如，<code>String</code> 拼接）。</p>
      *
-     * @return <code>true</code> if trace level logging is enabled, otherwise
-     *         <code>false</code>
+     * @return 如果启用了 trace 级别日志记录则返回 <code>true</code>，否则返回 <code>false</code>
      */
     boolean isTraceEnabled();
 
 
     /**
-     * <p> Is warn logging currently enabled? </p>
+     * <p>当前是否启用了 warn 级别日志记录？</p>
      *
-     * <p> Call this method to prevent having to perform expensive operations
-     * (for example, <code>String</code> concatenation)
-     * when the log level is more than warn. </p>
+     * <p>调用此方法可以避免在日志级别高于 warn 时执行昂贵的操作
+     * （例如，<code>String</code> 拼接）。</p>
      *
-     * @return <code>true</code> if warn level logging is enabled, otherwise
-     *         <code>false</code>
+     * @return 如果启用了 warn 级别日志记录则返回 <code>true</code>，否则返回 <code>false</code>
      */
     boolean isWarnEnabled();
 
@@ -145,103 +109,103 @@ public interface Log {
 
 
     /**
-     * <p> Log a message with trace log level. </p>
+     * <p>使用 trace 日志级别记录一条消息。</p>
      *
-     * @param message log this message
+     * @param message 要记录的消息
      */
     void trace(Object message);
 
 
     /**
-     * <p> Log an error with trace log level. </p>
+     * <p>使用 trace 日志级别记录一条消息和异常。</p>
      *
-     * @param message log this message
-     * @param t log this cause
+     * @param message 要记录的消息
+     * @param t 要记录的异常原因
      */
     void trace(Object message, Throwable t);
 
 
     /**
-     * <p> Log a message with debug log level. </p>
+     * <p>使用 debug 日志级别记录一条消息。</p>
      *
-     * @param message log this message
+     * @param message 要记录的消息
      */
     void debug(Object message);
 
 
     /**
-     * <p> Log an error with debug log level. </p>
+     * <p>使用 debug 日志级别记录一条消息和异常。</p>
      *
-     * @param message log this message
-     * @param t log this cause
+     * @param message 要记录的消息
+     * @param t 要记录的异常原因
      */
     void debug(Object message, Throwable t);
 
 
     /**
-     * <p> Log a message with info log level. </p>
+     * <p>使用 info 日志级别记录一条消息。</p>
      *
-     * @param message log this message
+     * @param message 要记录的消息
      */
     void info(Object message);
 
 
     /**
-     * <p> Log an error with info log level. </p>
+     * <p>使用 info 日志级别记录一条消息和异常。</p>
      *
-     * @param message log this message
-     * @param t log this cause
+     * @param message 要记录的消息
+     * @param t 要记录的异常原因
      */
     void info(Object message, Throwable t);
 
 
     /**
-     * <p> Log a message with warn log level. </p>
+     * <p>使用 warn 日志级别记录一条消息。</p>
      *
-     * @param message log this message
+     * @param message 要记录的消息
      */
     void warn(Object message);
 
 
     /**
-     * <p> Log an error with warn log level. </p>
+     * <p>使用 warn 日志级别记录一条消息和异常。</p>
      *
-     * @param message log this message
-     * @param t log this cause
+     * @param message 要记录的消息
+     * @param t 要记录的异常原因
      */
     void warn(Object message, Throwable t);
 
 
     /**
-     * <p> Log a message with error log level. </p>
+     * <p>使用 error 日志级别记录一条消息。</p>
      *
-     * @param message log this message
+     * @param message 要记录的消息
      */
     void error(Object message);
 
 
     /**
-     * <p> Log an error with error log level. </p>
+     * <p>使用 error 日志级别记录一条消息和异常。</p>
      *
-     * @param message log this message
-     * @param t log this cause
+     * @param message 要记录的消息
+     * @param t 要记录的异常原因
      */
     void error(Object message, Throwable t);
 
 
     /**
-     * <p> Log a message with fatal log level. </p>
+     * <p>使用 fatal 日志级别记录一条消息。</p>
      *
-     * @param message log this message
+     * @param message 要记录的消息
      */
     void fatal(Object message);
 
 
     /**
-     * <p> Log an error with fatal log level. </p>
+     * <p>使用 fatal 日志级别记录一条消息和异常。</p>
      *
-     * @param message log this message
-     * @param t log this cause
+     * @param message 要记录的消息
+     * @param t 要记录的异常原因
      */
     void fatal(Object message, Throwable t);
 

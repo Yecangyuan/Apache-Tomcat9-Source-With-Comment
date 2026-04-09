@@ -1,26 +1,10 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.apache.juli;
 
 import java.util.logging.Formatter;
 import java.util.logging.LogRecord;
 
 /**
- * A more compact formatter. Equivalent log4j config:
+ * 更紧凑的日志格式化器，类似于 log4j 的格式。
  *
  * <pre>
  *  log4j.rootCategory=WARN, A1
@@ -30,20 +14,33 @@ import java.util.logging.LogRecord;
  *  log4j.appender.A1.layout.ConversionPattern=%r %-15.15c{2} %-1.1p %m %n
  * </pre>
  *
- * Example: 1130122891846 Http11BaseProtocol I Initializing Coyote HTTP/1.1 on http-8800
+ * 示例：1130122891846 Http11BaseProtocol I Initializing Coyote HTTP/1.1 on http-8800
  *
  * @author Costin Manolache
  */
 public class JdkLoggerFormatter extends Formatter {
 
-    // values from JDK Level
+    // JDK 日志级别值
+    /** 追踪级别（TRACE）- 400 */
     public static final int LOG_LEVEL_TRACE = 400;
+    /** 调试级别（DEBUG）- 500 */
     public static final int LOG_LEVEL_DEBUG = 500;
+    /** 信息级别（INFO）- 800 */
     public static final int LOG_LEVEL_INFO = 800;
+    /** 警告级别（WARN）- 900 */
     public static final int LOG_LEVEL_WARN = 900;
+    /** 错误级别（ERROR）- 1000 */
     public static final int LOG_LEVEL_ERROR = 1000;
+    /** 致命级别（FATAL）- 1000 */
     public static final int LOG_LEVEL_FATAL = 1000;
 
+    /**
+     * 格式化日志记录，输出格式为：时间戳 + 日志级别 + 日志器名称 + 消息。
+     * 如果包含异常，还会追加堆栈跟踪信息。
+     *
+     * @param record 要格式化的日志记录
+     * @return 格式化后的字符串
+     */
     @Override
     public String format(LogRecord record) {
         Throwable t = record.getThrown();

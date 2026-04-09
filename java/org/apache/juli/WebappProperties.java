@@ -1,57 +1,41 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.apache.juli;
 
 /**
- * An interface intended for use by class loaders associated with a web application that enables them to provide
- * additional information to JULI about the web application with which they are associated. For any web application the
- * combination of {@link #getWebappName()}, {@link #getHostName()} and {@link #getServiceName()} must be unique.
+ * 用于类加载器的接口，提供Web应用信息给JULI。
+ * 使与Web应用关联的类加载器能够向JULI提供有关该Web应用的附加信息。
+ * 对于任何Web应用，{@link #getWebappName()}、{@link #getHostName()} 和
+ * {@link #getServiceName()} 的组合必须是唯一的。
  */
 public interface WebappProperties {
 
     /**
-     * Returns a name for the logging system to use for the web application, if any, associated with the class loader.
+     * 获取Web应用名称。
      *
-     * @return The name to use for the web application or null if none is available.
+     * @return 用于Web应用的名称，如果没有可用名称则返回null。
      */
     String getWebappName();
 
     /**
-     * Returns a name for the logging system to use for the Host where the web application, if any, associated with the
-     * class loader is deployed.
+     * 获取主机名称。
      *
-     * @return The name to use for the Host where the web application is deployed or null if none is available.
+     * @return Web应用部署所在的主机名称，如果没有可用名称则返回null。
      */
     String getHostName();
 
     /**
-     * Returns a name for the logging system to use for the Service where the Host, if any, associated with the class
-     * loader is deployed.
+     * 获取服务名称。
      *
-     * @return The name to use for the Service where the Host is deployed or null if none is available.
+     * @return Web应用部署所在的服务名称，如果没有可用名称则返回null。
      */
     String getServiceName();
 
     /**
-     * Enables JULI to determine if the web application includes a local configuration without JULI having to look for
-     * the file which it may not have permission to do when running under a SecurityManager.
+     * 检查是否有日志配置。
+     * 使JULI能够确定Web应用是否包含本地配置，而无需JULI查找文件
+     * （在SecurityManager下运行时可能没有权限查找文件）。
      *
-     * @return {@code true} if the web application includes a logging configuration at the standard location of
-     *             /WEB-INF/classes/logging.properties.
+     * @return 如果Web应用在标准位置 /WEB-INF/classes/logging.properties
+     *         包含日志配置，则返回 {@code true}。
      */
     boolean hasLoggingConfig();
 }

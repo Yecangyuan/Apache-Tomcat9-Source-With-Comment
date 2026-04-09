@@ -1,19 +1,3 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.apache.juli;
 
 import java.io.PrintWriter;
@@ -29,36 +13,38 @@ import java.util.logging.LogManager;
 import java.util.logging.LogRecord;
 
 /**
- * Provides same information as default log format but on a single line to make it easier to grep the logs. The only
- * exception is stacktraces which are always preceded by whitespace to make it simple to skip them.
+ * 单行日志格式化器。提供与默认日志格式相同的信息，但输出在单行上，便于使用grep搜索日志。
+ * 唯一的例外是堆栈跟踪，它们总是以空格开头，以便于跳过。
  */
 /*
- * Date processing based on AccessLogValve.
+ * 日期处理基于AccessLogValve实现。
  */
 public class OneLineFormatter extends Formatter {
 
+    /** 未知线程名称 */
     private static final String UNKNOWN_THREAD_NAME = "Unknown thread with ID ";
     private static final Object threadMxBeanLock = new Object();
+    /** 线程MXBean */
     private static volatile ThreadMXBean threadMxBean = null;
     private static final int THREAD_NAME_CACHE_SIZE = 10000;
     private static final ThreadLocal<ThreadNameCache> threadNameCache = ThreadLocal
             .withInitial(() -> new ThreadNameCache(THREAD_NAME_CACHE_SIZE));
 
-    /* Timestamp format */
+    /** 默认时间格式 */
     private static final String DEFAULT_TIME_FORMAT = "dd-MMM-yyyy HH:mm:ss.SSS";
 
     /**
-     * The size of our global date format cache
+     * 全局缓存大小
      */
     private static final int globalCacheSize = 30;
 
     /**
-     * The size of our thread local date format cache
+     * 本地缓存大小
      */
     private static final int localCacheSize = 5;
 
     /**
-     * Thread local date format cache.
+     * 线程本地日期格式缓存。
      */
     private ThreadLocal<DateFormatCache> localDateCache;
 
@@ -75,9 +61,10 @@ public class OneLineFormatter extends Formatter {
 
 
     /**
-     * Specify the time format to use for time stamps in log messages.
+     * 设置时间格式。
+     * 指定日志消息中时间戳使用的时间格式。
      *
-     * @param timeFormat The format to use using the {@link java.text.SimpleDateFormat} syntax
+     * @param timeFormat 使用 {@link java.text.SimpleDateFormat} 语法的格式
      */
     public void setTimeFormat(final String timeFormat) {
         final String cachedTimeFormat;
@@ -106,15 +93,20 @@ public class OneLineFormatter extends Formatter {
 
 
     /**
-     * Obtain the format currently being used for time stamps in log messages.
+     * 获取时间格式。
+     * 获取当前用于日志消息中时间戳的格式。
      *
-     * @return The current format in {@link java.text.SimpleDateFormat} syntax
+     * @return 当前使用 {@link java.text.SimpleDateFormat} 语法的格式
      */
     public String getTimeFormat() {
         return localDateCache.get().getTimeFormat();
     }
 
 
+    /**
+     * 格式化日志记录。
+     * 将日志记录格式化为单行字符串。
+     */
     @Override
     public String format(LogRecord record) {
         StringBuilder sb = new StringBuilder();
@@ -164,6 +156,10 @@ public class OneLineFormatter extends Formatter {
         return sb.toString();
     }
 
+    /**
+     * 添加时间戳。
+     * 将格式化的时间戳添加到字符串构建器中。
+     */
     protected void addTimestamp(StringBuilder buf, long timestamp) {
         String cachedTimeStamp = localDateCache.get().getFormat(timestamp);
         if (millisHandling == MillisHandling.NONE) {
@@ -208,11 +204,11 @@ public class OneLineFormatter extends Formatter {
 
 
     /**
-     * LogRecord has threadID but no thread name. LogRecord uses an int for thread ID but thread IDs are longs. If the
-     * real thread ID > (Integer.MAXVALUE / 2) LogRecord uses it's own ID in an effort to avoid clashes due to overflow.
+     * 获取线程名称。
+     * LogRecord有threadID但没有线程名称。LogRecord使用int表示线程ID但线程ID是long类型。
+     * 如果真实线程ID > (Integer.MAXVALUE / 2)，LogRecord会使用自己的ID以避免溢出冲突。
      * <p>
-     * Words fail me to describe what I think of the design decision to use an int in LogRecord for a long value and the
-     * resulting mess that follows.
+     * 无法用言语形容我对在LogRecord中使用int表示long值的设计决策以及随之而来的混乱的看法。
      */
     private static String getThreadName(int logRecordThreadId) {
         Map<Integer, String> cache = threadNameCache.get();
@@ -247,7 +243,7 @@ public class OneLineFormatter extends Formatter {
 
 
     /*
-     * This is an LRU cache.
+     * 线程名称缓存。这是一个LRU缓存。
      */
     private static class ThreadNameCache extends LinkedHashMap<Integer, String> {
 
@@ -268,8 +264,7 @@ public class OneLineFormatter extends Formatter {
 
 
     /*
-     * Minimal implementation to indent the printing of stack traces. This implementation depends on Throwable using
-     * WrappedPrintWriter.
+     * 缩进打印写入器。用于缩进打印堆栈跟踪的最小实现。
      */
     private static class IndentingPrintWriter extends PrintWriter {
 
@@ -285,6 +280,7 @@ public class OneLineFormatter extends Formatter {
     }
 
 
+    /** 毫秒处理方式。定义时间戳中毫秒部分的处理方式。 */
     private enum MillisHandling {
         NONE, APPEND, REPLACE_S, REPLACE_SS, REPLACE_SSS,
     }
