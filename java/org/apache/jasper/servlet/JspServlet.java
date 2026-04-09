@@ -1,19 +1,3 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.apache.jasper.servlet;
 
 import java.io.FileNotFoundException;
@@ -45,14 +29,22 @@ import org.apache.tomcat.PeriodicEventListener;
 import org.apache.tomcat.util.security.Escape;
 
 /**
- * The JSP engine (a.k.a Jasper).
- *
- * The servlet container is responsible for providing a
- * URLClassLoader for the web application context Jasper
- * is being used in. Jasper will try get the Tomcat
- * ServletContext attribute for its ServletContext class
- * loader, if that fails, it uses the parent class loader.
- * In either case, it must be a URLClassLoader.
+ * Jasper JSP 引擎的主 Servlet 类。
+ * <p>
+ * 这是 Apache Tomcat JSP 引擎（Jasper）的核心入口类，负责处理所有 JSP 页面的请求。
+ * Servlet 容器需要为 Jasper 提供一个 URLClassLoader 用于 Web 应用的类加载。
+ * Jasper 会尝试从 Tomcat 的 ServletContext 属性中获取类加载器，如果失败则使用父类加载器。
+ * 无论哪种情况，类加载器都必须是 URLClassLoader 类型。
+ * </p>
+ * <p>
+ * 主要职责：
+ * <ul>
+ *   <li>初始化 JSP 运行时环境</li>
+ *   <li>处理 JSP 预编译请求</li>
+ *   <li>管理 JSP 页面的编译和加载</li>
+ *   <li>提供监控统计信息（JSP 数量、重载次数等）</li>
+ * </ul>
+ * </p>
  *
  * @author Anil K. Vijendran
  * @author Harish Prabandham
@@ -64,18 +56,36 @@ public class JspServlet extends HttpServlet implements PeriodicEventListener {
 
     private static final long serialVersionUID = 1L;
 
-    // Logger
+    // 日志记录器
     private final transient Log log = LogFactory.getLog(JspServlet.class);
 
+    // Servlet 上下文
     private transient ServletContext context;
+    // Servlet 配置
     private ServletConfig config;
+    // JSP 引擎配置选项
     private transient Options options;
+    // JSP 运行时上下文，管理所有 JSP 页面的编译和加载
     private transient JspRuntimeContext rctxt;
-    // jspFile for a jsp configured explicitly as a servlet, in environments where this
-    // configuration is translated into an init-param for this servlet.
+    // 显式配置为 Servlet 的 JSP 文件路径（通过 init-param 传入）
     private String jspFile;
 
 
+    /**
+     * 初始化 JspServlet。
+     * <p>
+     * 此方法完成以下工作：
+     * <ul>
+     *   <li>初始化 Servlet 上下文和配置</li>
+     *   <li>创建 Options 实例（支持自定义配置类）</li>
+     *   <li>创建 JspRuntimeContext 运行时上下文</li>
+     *   <li>如果配置了 jspFile 参数，执行预编译</li>
+     * </ul>
+     * </p>
+     *
+     * @param config Servlet 配置对象
+     * @throws ServletException 当初始化失败时抛出
+     */
     @Override
     public void init(ServletConfig config) throws ServletException {
 
@@ -83,8 +93,8 @@ public class JspServlet extends HttpServlet implements PeriodicEventListener {
         this.config = config;
         this.context = config.getServletContext();
 
-        // Initialize the JSP Runtime Context
-        // Check for a custom Options implementation
+        // 初始化 JSP 运行时上下文
+        // 检查是否配置了自定义的 Options 实现类
         String engineOptionsName = config.getInitParameter("engineOptionsClass");
         if (Constants.IS_SECURITY_ENABLED && engineOptionsName != null) {
             log.info(Localizer.getMessage(
@@ -92,7 +102,7 @@ public class JspServlet extends HttpServlet implements PeriodicEventListener {
             engineOptionsName = null;
         }
         if (engineOptionsName != null) {
-            // Instantiate the indicated Options implementation
+            // 实例化指定的 Options 实现类
             try {
                 ClassLoader loader = Thread.currentThread().getContextClassLoader();
                 Class<?> engineOptionsClass = loader.loadClass(engineOptionsName);
@@ -103,13 +113,13 @@ public class JspServlet extends HttpServlet implements PeriodicEventListener {
             } catch (Throwable e) {
                 e = ExceptionUtils.unwrapInvocationTargetException(e);
                 ExceptionUtils.handleThrowable(e);
-                // Need to localize this.
+                // 需要本地化此消息
                 log.warn(Localizer.getMessage("jsp.warning.engineOptionsClass", engineOptionsName), e);
-                // Use the default Options implementation
+                // 使用默认的 Options 实现
                 options = new EmbeddedServletOptions(config, context);
             }
         } else {
-            // Use the default Options implementation
+            // 使用默认的 Options 实现
             options = new EmbeddedServletOptions(config, context);
         }
         rctxt = new JspRuntimeContext(context, options);
@@ -151,14 +161,14 @@ public class JspServlet extends HttpServlet implements PeriodicEventListener {
 
 
     /**
-     * Returns the number of JSPs for which JspServletWrappers exist, i.e.,
-     * the number of JSPs that have been loaded into the webapp with which
-     * this JspServlet is associated.
+     * 获取已加载的 JSP 页面数量。
+     * <p>
+     * 返回当前存在 JspServletWrapper 的 JSP 页面数量，
+     * 即已加载到与该 JspServlet 关联的 Web 应用中的 JSP 页面数量。
+     * </p>
+     * <p>此信息可用于监控目的。</p>
      *
-     * <p>This info may be used for monitoring purposes.
-     *
-     * @return The number of JSPs that have been loaded into the webapp with
-     * which this JspServlet is associated
+     * @return 已加载的 JSP 页面数量
      */
     public int getJspCount() {
         return this.rctxt.getJspCount();
@@ -166,9 +176,9 @@ public class JspServlet extends HttpServlet implements PeriodicEventListener {
 
 
     /**
-     * Resets the JSP reload counter.
+     * 重置 JSP 重载计数器。
      *
-     * @param count Value to which to reset the JSP reload counter
+     * @param count 要将 JSP 重载计数器重置到的值
      */
     public void setJspReloadCount(int count) {
         this.rctxt.setJspReloadCount(count);
@@ -176,12 +186,10 @@ public class JspServlet extends HttpServlet implements PeriodicEventListener {
 
 
     /**
-     * Gets the number of JSPs that have been reloaded.
+     * 获取已重载的 JSP 页面数量。
+     * <p>此信息可用于监控目的。</p>
      *
-     * <p>This info may be used for monitoring purposes.
-     *
-     * @return The number of JSPs (in the webapp with which this JspServlet is
-     * associated) that have been reloaded
+     * @return 已重载的 JSP 页面数量
      */
     public int getJspReloadCount() {
         return this.rctxt.getJspReloadCount();
@@ -189,12 +197,10 @@ public class JspServlet extends HttpServlet implements PeriodicEventListener {
 
 
     /**
-     * Gets the number of JSPs that are in the JSP limiter queue
+     * 获取 JSP 限制器队列中的 JSP 页面数量。
+     * <p>此信息可用于监控目的。</p>
      *
-     * <p>This info may be used for monitoring purposes.
-     *
-     * @return The number of JSPs (in the webapp with which this JspServlet is
-     * associated) that are in the JSP limiter queue
+     * @return 在 JSP 限制器队列中的 JSP 页面数量
      */
     public int getJspQueueLength() {
         return this.rctxt.getJspQueueLength();
@@ -202,12 +208,10 @@ public class JspServlet extends HttpServlet implements PeriodicEventListener {
 
 
     /**
-     * Gets the number of JSPs that have been unloaded.
+     * 获取已卸载的 JSP 页面数量。
+     * <p>此信息可用于监控目的。</p>
      *
-     * <p>This info may be used for monitoring purposes.
-     *
-     * @return The number of JSPs (in the webapp with which this JspServlet is
-     * associated) that have been unloaded
+     * @return 已卸载的 JSP 页面数量
      */
     public int getJspUnloadCount() {
         return this.rctxt.getJspUnloadCount();
@@ -215,17 +219,14 @@ public class JspServlet extends HttpServlet implements PeriodicEventListener {
 
 
     /**
-     * <p>Look for a <em>precompilation request</em> as described in
-     * Section 8.4.2 of the JSP 1.2 Specification.  <strong>WARNING</strong> -
-     * we cannot use <code>request.getParameter()</code> for this, because
-     * that will trigger parsing all of the request parameters, and not give
-     * a servlet the opportunity to call
-     * <code>request.setCharacterEncoding()</code> first.</p>
+     * <p>检查是否为 JSP 预编译请求（如 JSP 1.2 规范第 8.4.2 节所述）。
+     * <strong>警告</strong> - 我们不能使用 <code>request.getParameter()</code> 来检查，
+     * 因为那会触发解析所有请求参数，而不会给 Servlet 机会先调用
+     * <code>request.setCharacterEncoding()</code>。</p>
      *
-     * @param request The servlet request we are processing
-     *
-     * @exception ServletException if an invalid parameter value for the
-     *  <code>jsp_precompile</code> parameter name is specified
+     * @param request 正在处理的 Servlet 请求
+     * @return 如果是预编译请求则返回 true，否则返回 false
+     * @throws ServletException 当为 <code>jsp_precompile</code> 参数指定了无效值时抛出
      */
     boolean preCompile(HttpServletRequest request) throws ServletException {
 
@@ -246,7 +247,7 @@ public class JspServlet extends HttpServlet implements PeriodicEventListener {
             return true;             // ?jsp_precompile&foo=bar...
         }
         if (!queryString.startsWith("=")) {
-            return false;            // part of some other name or value
+            return false;            // 是其他名称或值的一部分
         }
         int limit = queryString.length();
         int ampersand = queryString.indexOf('&');
@@ -257,11 +258,9 @@ public class JspServlet extends HttpServlet implements PeriodicEventListener {
         if (value.equals("true")) {
             return true;             // ?jsp_precompile=true
         } else if (value.equals("false")) {
-            // Spec says if jsp_precompile=false, the request should not
-            // be delivered to the JSP page; the easiest way to implement
-            // this is to set the flag to true, and precompile the page anyway.
-            // This still conforms to the spec, since it says the
-            // precompilation request can be ignored.
+            // 规范说明如果 jsp_precompile=false，请求不应该传递给 JSP 页面；
+            // 最简单的实现方式是将标志设为 true，仍然预编译页面。
+            // 这仍然符合规范，因为规范说可以忽略预编译请求。
             return true;             // ?jsp_precompile=false
         } else {
             throw new ServletException(Localizer.getMessage("jsp.error.precompilation.parameter",
@@ -271,25 +270,35 @@ public class JspServlet extends HttpServlet implements PeriodicEventListener {
     }
 
 
+    /**
+     * 处理 JSP 请求的核心方法。
+     * <p>
+     * 此方法解析请求中的 JSP 路径，检查是否为预编译请求，
+     * 然后调用 serviceJspFile 方法处理具体的 JSP 文件。
+     * </p>
+     *
+     * @param request  HTTP 请求对象
+     * @param response HTTP 响应对象
+     * @throws ServletException 当处理过程中发生 Servlet 异常时抛出
+     * @throws IOException      当发生 I/O 错误时抛出
+     */
     @Override
     public void service (HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // jspFile may be configured as an init-param for this servlet instance
+        // jspFile 可能作为此 Servlet 实例的 init-param 配置
         String jspUri = jspFile;
 
         if (jspUri == null) {
             /*
-             * Check to see if the requested JSP has been the target of a
-             * RequestDispatcher.include()
+             * 检查请求的 JSP 是否是 RequestDispatcher.include() 的目标
              */
             jspUri = (String) request.getAttribute(
                     RequestDispatcher.INCLUDE_SERVLET_PATH);
             if (jspUri != null) {
                 /*
-                 * Requested JSP has been target of
-                 * RequestDispatcher.include(). Its path is assembled from the
-                 * relevant javax.servlet.include.* request attributes
+                 * 请求的 JSP 是 RequestDispatcher.include() 的目标。
+                 * 其路径由相关的 javax.servlet.include.* 请求属性组装而成
                  */
                 String pathInfo = (String) request.getAttribute(
                         RequestDispatcher.INCLUDE_PATH_INFO);
@@ -298,9 +307,8 @@ public class JspServlet extends HttpServlet implements PeriodicEventListener {
                 }
             } else {
                 /*
-                 * Requested JSP has not been the target of a
-                 * RequestDispatcher.include(). Reconstruct its path from the
-                 * request's getServletPath() and getPathInfo()
+                 * 请求的 JSP 不是 RequestDispatcher.include() 的目标。
+                 * 从请求的 getServletPath() 和 getPathInfo() 重构其路径
                  */
                 jspUri = request.getServletPath();
                 String pathInfo = request.getPathInfo();
@@ -331,6 +339,10 @@ public class JspServlet extends HttpServlet implements PeriodicEventListener {
 
     }
 
+    /**
+     * 销毁 JspServlet，释放所有资源。
+     * 调用 JspRuntimeContext 的 destroy 方法进行清理。
+     */
     @Override
     public void destroy() {
         if (log.isTraceEnabled()) {
@@ -341,14 +353,38 @@ public class JspServlet extends HttpServlet implements PeriodicEventListener {
     }
 
 
+    /**
+     * 周期性事件处理方法（实现 PeriodicEventListener 接口）。
+     * <p>
+     * 此方法由容器定期调用，用于：
+     * <ul>
+     *   <li>检查并卸载长时间未使用的 JSP 页面</li>
+     *   <li>检查并编译已修改的 JSP 页面</li>
+     * </ul>
+     * </p>
+     */
     @Override
     public void periodicEvent() {
         rctxt.checkUnload();
         rctxt.checkCompile();
     }
 
-    // -------------------------------------------------------- Private Methods
+    // -------------------------------------------------------- 私有方法
 
+    /**
+     * 处理指定的 JSP 文件请求。
+     * <p>
+     * 此方法负责获取或创建 JspServletWrapper，
+     * 并调用 wrapper 的 service 方法处理请求。
+     * </p>
+     *
+     * @param request    HTTP 请求对象
+     * @param response   HTTP 响应对象
+     * @param jspUri     JSP 文件的路径
+     * @param precompile 是否为预编译请求
+     * @throws ServletException 当处理过程中发生 Servlet 异常时抛出
+     * @throws IOException      当发生 I/O 错误时抛出
+     */
     private void serviceJspFile(HttpServletRequest request,
                                 HttpServletResponse response, String jspUri,
                                 boolean precompile)
@@ -359,8 +395,7 @@ public class JspServlet extends HttpServlet implements PeriodicEventListener {
             synchronized(this) {
                 wrapper = rctxt.getWrapper(jspUri);
                 if (wrapper == null) {
-                    // Check if the requested JSP page exists, to avoid
-                    // creating unnecessary directories and files.
+                    // 检查请求的 JSP 页面是否存在，以避免创建不必要的目录和文件
                     if (null == context.getResource(jspUri)) {
                         handleMissingResource(request, response, jspUri);
                         return;
@@ -381,6 +416,19 @@ public class JspServlet extends HttpServlet implements PeriodicEventListener {
     }
 
 
+    /**
+     * 处理缺失的 JSP 资源。
+     * <p>
+     * 如果资源是通过 RequestDispatcher.include() 包含的，则抛出 ServletException；
+     * 否则返回 404 错误响应。
+     * </p>
+     *
+     * @param request  HTTP 请求对象
+     * @param response HTTP 响应对象
+     * @param jspUri   缺失的 JSP 文件路径
+     * @throws ServletException 当资源是包含请求时抛出
+     * @throws IOException      当发生 I/O 错误时抛出
+     */
     private void handleMissingResource(HttpServletRequest request,
             HttpServletResponse response, String jspUri)
             throws ServletException, IOException {
@@ -390,10 +438,8 @@ public class JspServlet extends HttpServlet implements PeriodicEventListener {
 
         String msg = Localizer.getMessage("jsp.error.file.not.found",jspUri);
         if (includeRequestUri != null) {
-            // This file was included. Throw an exception as
-            // a response.sendError() will be ignored
-            // Strictly, filtering this is an application
-            // responsibility but just in case...
+            // 此文件是被包含的。抛出异常，因为 response.sendError() 会被忽略
+            // 严格来说，过滤这是应用层的责任，但以防万一...
             throw new ServletException(Escape.htmlElementContent(msg));
         } else {
             try {
