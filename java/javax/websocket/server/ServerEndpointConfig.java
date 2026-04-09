@@ -1,19 +1,3 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package javax.websocket.server;
 
 import java.security.AccessController;
@@ -30,18 +14,16 @@ import javax.websocket.Extension;
 import javax.websocket.HandshakeResponse;
 
 /**
- * Provides configuration information for WebSocket endpoints published to a server. Applications may provide their own
- * implementation or use {@link Builder}.
+ * 为发布到服务器的 WebSocket 端点提供配置信息。应用程序可以提供自己的实现或使用 {@link Builder}。
  */
 public interface ServerEndpointConfig extends EndpointConfig {
 
     Class<?> getEndpointClass();
 
     /**
-     * Returns the path at which this WebSocket server endpoint has been registered. It may be a path or a level 0 URI
-     * template.
+     * 返回此 WebSocket 服务端端点注册的路径。可能是路径或 0 级 URI 模板。
      *
-     * @return The registered path
+     * @return 注册的路径
      */
     String getPath();
 
@@ -52,8 +34,18 @@ public interface ServerEndpointConfig extends EndpointConfig {
     Configurator getConfigurator();
 
 
+    /**
+     * 用于构建 ServerEndpointConfig 的构建器类
+     */
     final class Builder {
 
+        /**
+         * 创建构建器实例
+         *
+         * @param endpointClass 端点类
+         * @param path          路径
+         * @return 构建器实例
+         */
         public static Builder create(Class<?> endpointClass, String path) {
             return new Builder(endpointClass, path);
         }
@@ -85,12 +77,23 @@ public interface ServerEndpointConfig extends EndpointConfig {
             this.path = path;
         }
 
+        /**
+         * 构建 ServerEndpointConfig 实例
+         *
+         * @return ServerEndpointConfig 实例
+         */
         public ServerEndpointConfig build() {
             return new DefaultServerEndpointConfig(endpointClass, path, subprotocols, extensions, encoders, decoders,
                     configurator);
         }
 
 
+        /**
+         * 设置编码器列表
+         *
+         * @param encoders 编码器类列表
+         * @return 构建器实例
+         */
         public Builder encoders(List<Class<? extends Encoder>> encoders) {
             if (encoders == null || encoders.size() == 0) {
                 this.encoders = Collections.emptyList();
@@ -101,6 +104,12 @@ public interface ServerEndpointConfig extends EndpointConfig {
         }
 
 
+        /**
+         * 设置解码器列表
+         *
+         * @param decoders 解码器类列表
+         * @return 构建器实例
+         */
         public Builder decoders(List<Class<? extends Decoder>> decoders) {
             if (decoders == null || decoders.size() == 0) {
                 this.decoders = Collections.emptyList();
@@ -111,6 +120,12 @@ public interface ServerEndpointConfig extends EndpointConfig {
         }
 
 
+        /**
+         * 设置子协议列表
+         *
+         * @param subprotocols 子协议列表
+         * @return 构建器实例
+         */
         public Builder subprotocols(List<String> subprotocols) {
             if (subprotocols == null || subprotocols.size() == 0) {
                 this.subprotocols = Collections.emptyList();
@@ -121,6 +136,12 @@ public interface ServerEndpointConfig extends EndpointConfig {
         }
 
 
+        /**
+         * 设置扩展列表
+         *
+         * @param extensions 扩展列表
+         * @return 构建器实例
+         */
         public Builder extensions(List<Extension> extensions) {
             if (extensions == null || extensions.size() == 0) {
                 this.extensions = Collections.emptyList();
@@ -131,6 +152,12 @@ public interface ServerEndpointConfig extends EndpointConfig {
         }
 
 
+        /**
+         * 设置配置器
+         *
+         * @param serverEndpointConfigurator 服务端端点配置器
+         * @return 构建器实例
+         */
         public Builder configurator(Configurator serverEndpointConfigurator) {
             if (serverEndpointConfigurator == null) {
                 this.configurator = Configurator.fetchContainerDefaultConfigurator();
@@ -142,6 +169,9 @@ public interface ServerEndpointConfig extends EndpointConfig {
     }
 
 
+    /**
+     * 配置器类，用于配置 WebSocket 端点的握手和端点实例创建
+     */
     class Configurator {
 
         private static volatile Configurator defaultImpl = null;
@@ -150,6 +180,11 @@ public interface ServerEndpointConfig extends EndpointConfig {
         private static final String DEFAULT_IMPL_CLASSNAME =
                 "org.apache.tomcat.websocket.server.DefaultServerEndpointConfigurator";
 
+        /**
+         * 获取容器默认配置器
+         *
+         * @return 默认配置器实例
+         */
         static Configurator fetchContainerDefaultConfigurator() {
             if (defaultImpl == null) {
                 synchronized (defaultImplLock) {
@@ -199,22 +234,57 @@ public interface ServerEndpointConfig extends EndpointConfig {
         }
 
 
+        /**
+         * 获取协商后的子协议
+         *
+         * @param supported 服务器支持的子协议列表
+         * @param requested 客户端请求的子协议列表
+         * @return 协商后的子协议
+         */
         public String getNegotiatedSubprotocol(List<String> supported, List<String> requested) {
             return fetchContainerDefaultConfigurator().getNegotiatedSubprotocol(supported, requested);
         }
 
+        /**
+         * 获取协商后的扩展列表
+         *
+         * @param installed 服务器已安装的扩展列表
+         * @param requested 客户端请求的扩展列表
+         * @return 协商后的扩展列表
+         */
         public List<Extension> getNegotiatedExtensions(List<Extension> installed, List<Extension> requested) {
             return fetchContainerDefaultConfigurator().getNegotiatedExtensions(installed, requested);
         }
 
+        /**
+         * 检查请求来源是否允许
+         *
+         * @param originHeaderValue Origin 请求头值
+         * @return 如果允许返回 true，否则返回 false
+         */
         public boolean checkOrigin(String originHeaderValue) {
             return fetchContainerDefaultConfigurator().checkOrigin(originHeaderValue);
         }
 
+        /**
+         * 修改握手信息
+         *
+         * @param sec      服务端端点配置
+         * @param request  握手请求
+         * @param response 握手响应
+         */
         public void modifyHandshake(ServerEndpointConfig sec, HandshakeRequest request, HandshakeResponse response) {
             fetchContainerDefaultConfigurator().modifyHandshake(sec, request, response);
         }
 
+        /**
+         * 获取端点实例
+         *
+         * @param clazz 端点类
+         * @param <T>   端点类型
+         * @return 端点实例
+         * @throws InstantiationException 如果实例化失败
+         */
         public <T extends Object> T getEndpointInstance(Class<T> clazz) throws InstantiationException {
             return fetchContainerDefaultConfigurator().getEndpointInstance(clazz);
         }

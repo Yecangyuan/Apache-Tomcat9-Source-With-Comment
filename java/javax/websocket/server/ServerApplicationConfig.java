@@ -1,19 +1,3 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package javax.websocket.server;
 
 import java.util.Set;
@@ -21,26 +5,26 @@ import java.util.Set;
 import javax.websocket.Endpoint;
 
 /**
- * Applications may provide an implementation of this interface to filter the discovered WebSocket endpoints that are
- * deployed. Implementations of this class will be discovered via an ServletContainerInitializer scan.
+ * 应用程序可以提供此接口的实现来过滤要部署的已发现 WebSocket 端点。
+ * 此类的实现将通过 ServletContainerInitializer 扫描发现。
  */
 public interface ServerApplicationConfig {
 
     /**
-     * Enables applications to filter the discovered implementations of {@link ServerEndpointConfig}.
+     * 使应用程序能够过滤已发现的 {@link ServerEndpointConfig} 实现。
      *
-     * @param scanned The {@link Endpoint} implementations found in the application
+     * @param scanned 应用程序中找到的 {@link Endpoint} 实现
      *
-     * @return The set of configurations for the endpoint the application wishes to deploy
+     * @return 应用程序希望部署的端点配置集合
      */
     Set<ServerEndpointConfig> getEndpointConfigs(Set<Class<? extends Endpoint>> scanned);
 
     /**
-     * Enables applications to filter the discovered classes annotated with {@link ServerEndpoint}.
+     * 使应用程序能够过滤已发现的使用 {@link ServerEndpoint} 注解的类。
      *
-     * @param scanned The POJOs annotated with {@link ServerEndpoint} found in the application
+     * @param scanned 应用程序中找到的使用 {@link ServerEndpoint} 注解的 POJO
      *
-     * @return The set of POJOs the application wishes to deploy
+     * @return 应用程序希望部署的 POJO 集合
      */
     Set<Class<?>> getAnnotatedEndpointClasses(Set<Class<?>> scanned);
 }

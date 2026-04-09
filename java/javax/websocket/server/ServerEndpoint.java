@@ -1,19 +1,3 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package javax.websocket.server;
 
 import java.lang.annotation.ElementType;
@@ -24,22 +8,37 @@ import java.lang.annotation.Target;
 import javax.websocket.Decoder;
 import javax.websocket.Encoder;
 
+/**
+ * 用于标注 WebSocket 服务端端点的注解
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface ServerEndpoint {
 
     /**
-     * URI or URI-template that the annotated class should be mapped to.
+     * 端点应映射到的 URI 或 URI 模板
      *
-     * @return The URI or URI-template that the annotated class should be mapped to.
+     * @return 端点应映射到的 URI 或 URI 模板
      */
     String value();
 
+    /**
+     * 支持的子协议列表，默认为空
+     */
     String[] subprotocols() default {};
 
+    /**
+     * 解码器类列表，用于将消息解码为 Java 对象，默认为空
+     */
     Class<? extends Decoder>[] decoders() default {};
 
+    /**
+     * 编码器类列表，用于将 Java 对象编码为消息，默认为空
+     */
     Class<? extends Encoder>[] encoders() default {};
 
+    /**
+     * 配置器类，用于自定义端点配置，默认为容器提供的配置器
+     */
     Class<? extends ServerEndpointConfig.Configurator> configurator() default ServerEndpointConfig.Configurator.class;
 }
