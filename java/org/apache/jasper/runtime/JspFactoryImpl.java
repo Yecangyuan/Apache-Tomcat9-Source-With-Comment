@@ -1,19 +1,3 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.apache.jasper.runtime;
 
 import java.io.IOException;
@@ -32,19 +16,42 @@ import javax.servlet.jsp.PageContext;
 import org.apache.jasper.Constants;
 
 /**
- * Implementation of JspFactory.
+ * JspFactory 的实现类。
+ * <p>
+ * 该类实现了 JspFactory 抽象类，提供了创建和管理 PageContext 对象的功能。
+ * 使用线程本地存储来实现 PageContext 对象池，以提高性能。
+ * </p>
  *
  * @author Anil K. Vijendran
  */
 public class JspFactoryImpl extends JspFactory {
 
+    // 是否使用 PageContext 对象池，默认开启
     private static final boolean USE_POOL =
         Boolean.parseBoolean(System.getProperty("org.apache.jasper.runtime.JspFactoryImpl.USE_POOL", "true"));
+    // 对象池大小，默认为 8
     private static final int POOL_SIZE =
         Integer.parseInt(System.getProperty("org.apache.jasper.runtime.JspFactoryImpl.POOL_SIZE", "8"));
 
+    // 线程本地变量，存储每个线程的 PageContext 对象池
     private final ThreadLocal<PageContextPool> localPool = new ThreadLocal<>();
 
+    /**
+     * 获取 PageContext。
+     * <p>
+     * 根据传入的 Servlet 和请求响应对象创建或从池中获取 PageContext 实例。
+     * 如果启用了安全管理器，则在特权模式下执行。
+     * </p>
+     *
+     * @param servlet 当前 Servlet 实例
+     * @param request Servlet 请求对象
+     * @param response Servlet 响应对象
+     * @param errorPageURL 错误页面 URL
+     * @param needsSession 是否需要会话
+     * @param bufferSize 缓冲区大小
+     * @param autoflush 是否自动刷新
+     * @return 初始化后的 PageContext 实例
+     */
     @Override
     public PageContext getPageContext(Servlet servlet, ServletRequest request,
             ServletResponse response, String errorPageURL, boolean needsSession,
@@ -62,6 +69,15 @@ public class JspFactoryImpl extends JspFactory {
         }
     }
 
+    /**
+     * 释放 PageContext。
+     * <p>
+     * 将使用完毕的 PageContext 返回到对象池中以便复用。
+     * 如果启用了安全管理器，则在特权模式下执行。
+     * </p>
+     *
+     * @param pc 需要释放的 PageContext 实例
+     */
     @Override
     public void releasePageContext(PageContext pc) {
         if( pc == null ) {
