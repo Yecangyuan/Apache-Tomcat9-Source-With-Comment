@@ -1,0 +1,96 @@
+Buildfile: /Users/simley/SourceReading/Tomcat/apache-tomcat-9.0.90-src/build.xml
+
+download-bnd:
+
+testexist:
+     [echo] Testing  for /Users/simley/SourceReading/Tomcat/tomcat-build-libs/bnd-7.0.0/biz.aQute.bnd-7.0.0.jar
+
+setproxy:
+
+downloadfile:
+
+setup-bnd:
+
+download-compile:
+
+testexist:
+     [echo] Testing  for /Users/simley/SourceReading/Tomcat/tomcat-build-libs/commons-daemon-1.4.0/commons-daemon-1.4.0.jar
+
+downloadgz-2:
+
+testexist:
+     [echo] Testing  for /Users/simley/SourceReading/Tomcat/tomcat-build-libs/ecj-4.20/ecj-4.20.jar
+
+downloadfile-2:
+
+testexist:
+     [echo] Testing  for /Users/simley/SourceReading/Tomcat/tomcat-build-libs/jaxrpc-1.1-rc4/geronimo-spec-jaxrpc-1.1-rc4.jar
+
+setproxy:
+
+downloadfile:
+
+testexist:
+     [echo] Testing  for /Users/simley/SourceReading/Tomcat/tomcat-build-libs/wsdl4j-1.6.3/wsdl4j-1.6.3.jar
+
+setproxy:
+
+downloadfile:
+
+build-prepare:
+   [delete] Deleting directory /Users/simley/SourceReading/Tomcat/apache-tomcat-9.0.90-src/output/build/temp
+   [delete] Deleting directory /Users/simley/SourceReading/Tomcat/apache-tomcat-9.0.90-src/output/build/work
+    [mkdir] Created dir: /Users/simley/SourceReading/Tomcat/apache-tomcat-9.0.90-src/output/build/temp
+
+compile-prepare:
+
+download-validate:
+
+validate:
+
+compile:
+
+build-manifests:
+
+package:
+      [jar] Building jar: /Users/simley/SourceReading/Tomcat/apache-tomcat-9.0.90-src/output/build/lib/tomcat-i18n-cs.jar
+      [jar] Building jar: /Users/simley/SourceReading/Tomcat/apache-tomcat-9.0.90-src/output/build/lib/tomcat-i18n-de.jar
+      [jar] Building jar: /Users/simley/SourceReading/Tomcat/apache-tomcat-9.0.90-src/output/build/lib/tomcat-i18n-es.jar
+      [jar] Building jar: /Users/simley/SourceReading/Tomcat/apache-tomcat-9.0.90-src/output/build/lib/tomcat-i18n-fr.jar
+      [jar] Building jar: /Users/simley/SourceReading/Tomcat/apache-tomcat-9.0.90-src/output/build/lib/tomcat-i18n-ja.jar
+      [jar] Building jar: /Users/simley/SourceReading/Tomcat/apache-tomcat-9.0.90-src/output/build/lib/tomcat-i18n-ko.jar
+      [jar] Building jar: /Users/simley/SourceReading/Tomcat/apache-tomcat-9.0.90-src/output/build/lib/tomcat-i18n-pt-BR.jar
+      [jar] Building jar: /Users/simley/SourceReading/Tomcat/apache-tomcat-9.0.90-src/output/build/lib/tomcat-i18n-ru.jar
+      [jar] Building jar: /Users/simley/SourceReading/Tomcat/apache-tomcat-9.0.90-src/output/build/lib/tomcat-i18n-zh-CN.jar
+
+build-docs:
+[xmlvalidate] 1 file(s) have been successfully validated.
+     [xslt] Transforming into /Users/simley/SourceReading/Tomcat/apache-tomcat-9.0.90-src/output/build/webapps/docs
+     [xslt] Transforming into /Users/simley/SourceReading/Tomcat/apache-tomcat-9.0.90-src/output/build/webapps/docs/appdev
+     [xslt] Transforming into /Users/simley/SourceReading/Tomcat/apache-tomcat-9.0.90-src/output/build/webapps/docs/config
+     [xslt] Transforming into /Users/simley/SourceReading/Tomcat/apache-tomcat-9.0.90-src/output/build/webapps/docs/architecture
+     [xslt] Transforming into /Users/simley/SourceReading/Tomcat/apache-tomcat-9.0.90-src/output/build/webapps/docs/tribes
+
+build-tomcat-jdbc:
+     [echo] Building Tomcat JDBC pool libraries
+
+prepare:
+
+download:
+
+build-src:
+      [jar] Updating jar: /Users/simley/SourceReading/Tomcat/apache-tomcat-9.0.90-src/output/jdbc-pool/tomcat-jdbc-src.jar
+
+build:
+      [jar] Updating jar: /Users/simley/SourceReading/Tomcat/apache-tomcat-9.0.90-src/output/jdbc-pool/tomcat-jdbc.jar
+     [copy] Copying 1 file to /Users/simley/SourceReading/Tomcat/apache-tomcat-9.0.90-src/output/build/lib
+
+compile-webapp-examples:
+
+deploy:
+     [copy] Copying 1 file to /Users/simley/SourceReading/Tomcat/apache-tomcat-9.0.90-src/output/build/conf
+
+examples-sources:
+
+BUILD SUCCESSFUL
+Total time: 1 second
